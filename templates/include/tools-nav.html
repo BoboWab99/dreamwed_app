@@ -1,0 +1,19 @@
+<section class="tools-nav">
+   <div class="container">
+      <a href="{% url 'checklist' user_id=user.id %}" class="tool">
+         <i class="fas fa-tasks"></i>
+         <span>Task Tracker</span>
+      </a>
+      <a href="{% url 'budget-manager' user_id=user.id %}" class="tool">
+         <i class="fas fa-hand-holding-usd"></i>
+         <span>Budget manager</span>
+      </a>
+      <a href="{% url 'guestlist' user_id=user.id %}" class="tool">
+         <i class="fas fa-user-plus"></i>
+         <span>Guestlist manager</span>
+      </a>
+   </div>
+</section>
+
+<br>
+<hr><br>

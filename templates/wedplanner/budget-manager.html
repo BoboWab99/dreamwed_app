@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Budget manager {% endblock %}
+
+{% block body %}
+
+<!-- Modal -->
+<div class="modal fade" id="addExpense" tabindex="-1" role="dialog" aria-labelledby="addExpenseTitle" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+      <form action="" method="POST" class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="addExpenseTitle">Add new expense</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+
+         <div class="modal-body">
+            <div class="modal-body">
+               {% for field in form.visible_fields %}
+               <div class="form-group">
+                  {{ field.label_tag }}
+                  {% render_field field class+="form-control"%}
+                  {% if field.help_text %}
+                     <span class="help-text">{{ field.help_text }}</span>
+                  {% endif %}
+                  {% for error in field.erros %}
+                     <span style="color:red">{{ error }}</span>
+                  {% endfor %}
+               </div>
+               {% endfor %}
+            </div>
+         </div>
+
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save Expense</button>
+         </div>
+      </form>
+   </div>
+</div>
+
+{% include 'include/header.html' %}
+{% include 'include/tools-nav.html' %}
+
+<section>
+   <div class="container grid-200-auto">
+      <div class="side-nav">
+         <a href="#">All</a><br>
+         <a href="#">Venue</a><br>
+         <a href="#">Catering</a><br>
+         <a href="#">Dress & Attire</a><br>
+         <a href="#">Transportation</a><br>
+         <a href="#">Accomodation</a><br>
+      </div>
+
+      <div class="main-content">
+         <div class="filter flex-btwn">
+            <div>
+               <span>Filter by:</span>
+               <select name="rsvp" id="rsvp">
+                  <option value="">Fully paid</option>
+                  <option value="">Partially paid</option>
+                  <option value="">Not paid</option>
+               </select>
+            </div>
+
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addExpense">
+               <i class="fas fa-plus"></i>
+               <span>New Expense</span>
+            </button>
+         </div>
+
+         <br><br>
+
+         {% if expenses %}
+            <table class="table">
+               <thead>
+                  <tr>
+                     <th>Expense</th>
+                     <th>Estimated cost</th>
+                     <th>Paid</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody>
+                     {% for expense in expenses %}
+                        <tr>
+                           <td>
+                              <div class="expense">{{ expense.description }}</div>
+                              <a href="#">ADD NOTE</a>
+                           </td>
+                           <td>KES {{ expense.cost }}</td>
+                           <td>KES 30,000</td>
+                           <td><i class="fas fa-trash-alt"></i></td>
+                        </tr>
+                     {% endfor %}
+               </tbody>
+            </table>
+         {% else %}
+            <div class="center">
+               <br><br><br>
+               <h4>No budget item added yet!</h4>
+            </div>
+         {% endif %}
+      </div>
+   </div>
+</section>
+
+{% endblock %}

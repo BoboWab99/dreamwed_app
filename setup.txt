@@ -1,0 +1,35 @@
+#   Description	                            Command
+---------------------------------------------------------------------------------
+1a	Set up a virtual environment	        python -m venv env
+---------------------------------------------------------------------------------
+1b	Activate the virtual environment	    .\\env\Scripts\activate
+    If error                                Set-ExecutionPolicy Unrestricted -Scope Process
+                                            .\\env\Scripts\activate
+---------------------------------------------------------------------------------
+2a	 Install Django	                        python -m pip install django
+---------------------------------------------------------------------------------
+2b	 Pin your dependencies	                python -m pip freeze > requirements.txt
+---------------------------------------------------------------------------------
+3	 Set up a Django project	            django-admin startproject <projectname>
+---------------------------------------------------------------------------------
+4	 Start a Django app	                    python manage.py startapp <appname>
+---------------------------------------------------------------------------------
+5   More                                    python manage.py makemigrations
+                                            python manage.py migrate
+                                            python manage.py runserver
+                                            python manage.py createsuperuser
+                                            pip install django-widget-tweaks
+                                            pip install phonenumbers
+                                            pip install django-phonenumber-field
+                                        
+
+
+SOME SYSTEM USERS
+------------------------
+Admin: Admin
+Email: dreamwed.admin@exam.com
+
+Vendors: kenpics, zoephotos, wedcakes
+WedPlanners: Jeff, Kevin, Maria
+
+Password: drwdUserPa$$

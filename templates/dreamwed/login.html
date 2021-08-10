@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Login {% endblock %}
+
+{% block body %}
+<div class="container center">
+   <br><br><br>
+   <h2>DreamWed Login</h2><br>
+
+   <form action="{% url 'login' %}" method="POST" novalidate>
+      {% csrf_token %}
+
+      {% for field in form.visible_fields %}
+         <div class="form-group">
+            {{ field.label_tag }}
+            {% render_field field class+="form-control" %}
+            {% for error in field.errors %}
+               <span style="color:red">{{ error }}</span>
+            {% endfor %}
+         </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">Login</button>
+
+      <br><br><br>
+      <span>Don't have an account yet?</span>
+      <a href="{% url 'register' %}">Create account</a>
+      <br><br><br>
+      <a href="{% url 'home' %}">Go back Home</a>
+   </form>
+</div>
+
+{% endblock %}

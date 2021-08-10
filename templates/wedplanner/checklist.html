@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Task Master {% endblock %}
+
+{% block body %}
+
+<!-- Add New Task Modal -->
+<div class="modal fade" id="addTask" tabindex="-1" role="dialog" aria-labelledby="addTaskTitle"
+   aria-hidden="true">
+   <div class="modal-dialog modal-dialog-scrollable" role="document">
+      <form action="{% url 'create-task' user.id %}" method="POST" class="modal-content">
+         {% csrf_token %}
+
+         <div class="modal-header">
+            <h5 class="modal-title" id="addTaskTitle">Add new task</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+
+         <div class="modal-body">            
+         {% for field in form.visible_fields %}
+            <div class="form-group">
+               {{ field.label_tag }}
+               {% render_field field class+="form-control" %}
+               {% if field.help_text %}
+                  <span class="help-text">{{ field.help_text }}</span>
+               {% endif %}
+               {% for error in field.errors %}
+                  <span style="color:red">{{ error }}</span>
+               {% endfor %}
+            </div>
+         {% endfor %}
+         </div>
+
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save task</button>
+         </div>
+      </form>
+   </div>
+</div>
+
+<!-- Update Task Modal -->
+<div class="modal fade" id="updateTask" tabindex="-1" role="dialog" aria-labelledby="updateTaskTitle"
+   aria-hidden="true">
+   <div class="modal-dialog modal-dialog-scrollable" role="document">
+      <form action="" method="POST" name="updateTaskForm" id="updateTaskForm" class="modal-content">
+         {% csrf_token %}
+
+         <div class="modal-header">
+            <h5 class="modal-title" id="updateTaskTitle">Update task</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+
+         <div class="modal-body">            
+         {% for field in form.visible_fields %}
+            <div class="form-group">
+               {{ field.label_tag }}
+               {% render_field field class+="form-control" %}
+               {% if field.help_text %}
+                  <span class="help-text">{{ field.help_text }}</span>
+               {% endif %}
+               {% for error in field.errors %}
+                  <span style="color:red">{{ error }}</span>
+               {% endfor %}
+            </div>
+         {% endfor %}
+         </div>
+
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Update task</button>
+         </div>
+      </form>
+   </div>
+</div>
+
+{% include 'include/header.html' %}
+{% include 'include/tools-nav.html' %}
+
+<section>
+   <div class="container grid-200-auto">
+      <div class="side-nav">
+         <a href="#">All Tasks</a><br>
+         <a href="#">In progress</a><br>
+         <a href="#">Completed</a>
+      </div>
+
+      <div class="main-content">
+         <div class="filter flex-btwn">
+            <div>
+               <span>Filter by:</span>
+               {{ form.category }}
+               
+               <select name="due-date" id="due-date">
+                  <option value="" hidden>Due date</option>
+                  <option value="">Today</option>
+                  <option value="">This week</option>
+                  <option value="">Last week</option>
+                  <option value="">2 weeks ago</option>
+                  <option value="">1 month ago</option>
+               </select>
+            </div>
+
+            <!-- Button trigger add new task modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTask">
+               <i class="fas fa-plus"></i>
+               <span>New Task</span>
+            </button>
+         </div>
+
+         <br><br>
+
+         {% if todos %}
+         <table class="table">
+            <thead>
+               <tr>
+                  <th>Done</th>
+                  <th>Task</th>
+                  <th>Due</th>
+                  <th></th>
+               </tr>
+            </thead>
+
+            <tbody>
+            {% for todo in todos %}
+               <tr>
+                  <td>
+                     <form id="markComplete" action="{% url 'mark-task-as-complete' user_id=user.id task_id=todo.id %}">
+                        
+                        <input type="checkbox" value="{{ todo.completed }}" onchange="this.form.submit()">
+                     </form>
+
+                     <!-- HELP UPDATING TASKS -->
+                     <input type="text" id="todo_{{ todo.id }}_content" value="{{ todo.content }}" disabled>
+                     <input type="text" id="todo_{{ todo.id }}_category" value="{{ todo.category_id }}" disabled>
+                     <input type="number" id="todo_{{ todo.id }}_cost" value="{{ todo.cost }}" disabled>
+                     <input type="date" id="todo_{{ todo.id }}_date" value="{{ todo.due_date|date:'Y-m-d' }}" disabled>
+                     <input type="checkbox" id="todo_{{ todo.id }}_completed" value="{{ todo.completed }}" disabled>
+                  </td>
+                  <td class="pointer" title="Click to update this task." data-user-id="{{ user.id }}" data-task-id="{{ todo.id }}" data-toggle="modal" data-target="#updateTask" onclick="updateTask(this.getAttribute('data-user-id'), this.getAttribute('data-task-id'));">
+                     <div class="task">{{ todo.content }}</div>
+                     <span class="task-label">{{ todo.category }}</span>
+                  </td>
+                  <td style="text-transform: capitalize;">
+                     {% if todo.due_date %}
+                     {{ todo.due_date|date:'d/m/Y' }}
+                     {% endif %}
+                  </td>
+                  <td>
+                     <a href="{% url 'delete-task' user_id=user.id task_id=todo.id %}"><i class="fas fa-trash-alt"></i></a>
+                  </td>
+               </tr>
+            {% endfor %}
+            </tbody>
+         </table>
+         {% else %}
+            <div class="center">
+               <br><br><br>
+               <h4>No wedding task added yet!</h4>
+            </div>
+         {% endif %}
+      </div>
+   </div>
+</section>
+
+<script>
+
+   function fillTaskSavedValues(taskId) {
+      var taskContentClass = 'todo_' + taskId + '_content';
+      var taskCategoryClass = 'todo_' + taskId + '_category';
+      var taskCostClass = 'todo_' + taskId + '_cost';
+      var taskDueDateClass = 'todo_' + taskId + '_date';
+      var taskCompletedClass = 'todo_' + taskId + '_completed';
+
+      var taskContent = document.getElementById(taskContentClass).value;
+      var taskCategory = document.getElementById(taskCategoryClass).value;
+      var taskCost = document.getElementById(taskCostClass).value;
+      var taskDueDate = document.getElementById(taskDueDateClass).value;
+      var taskCompleted = document.getElementById(taskCompletedClass).value;
+
+      var updateForm = document.getElementById('updateTaskForm');
+      updateForm.querySelector('#id_content').value = taskContent;
+      updateForm.querySelector('#id_category').value = taskCategory;
+      updateForm.querySelector('#id_cost').value = taskCost;
+      updateForm.querySelector('#id_due_date').value = taskDueDate;
+      updateForm.querySelector('#id_completed').value = taskCompleted;
+   }
+
+   function updateTask(userId, taskId) {
+      var actionUrl = taskId + '/update';
+      document.forms.updateTaskForm.action = actionUrl;
+      fillTaskSavedValues(taskId);
+   }
+
+   // document.getElementById('markComplete').querySelectorAll('#id_completed').forEach(checkbox => {
+   //    checkbox.addEventListener('change', function() {
+   //       this.form.submit();
+   //    });
+   // });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Guestlist Manager {% endblock %}
+
+{% block body %}
+
+<!-- Modal -->
+<div class="modal fade" id="addGuest" tabindex="-1" role="dialog" aria-labelledby="addGuestTitle" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+      <form class="modal-content" action="" method="POST">
+         <div class="modal-header">
+            <h5 class="modal-title" id="addGuestTitle">Add new guest</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+
+         <div class="modal-body">
+         {% for field in form.visible_fields %}
+            <div class="form-group">
+               {{ field.label_tag }}
+               {% render_field field class+="form-control"%}
+               {% if field.help_text %}
+                  <span class="help-text">{{ field.help_text }}</span>
+               {% endif %}
+               {% for error in field.erros %}
+                  <span style="color:red">{{ error }}</span>
+               {% endfor %}
+            </div>
+         {% endfor %}
+         </div>
+
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save guest</button>
+         </div>
+      </form>
+   </div>
+</div>
+
+
+{% include 'include/header.html' %}
+{% include 'include/tools-nav.html' %}
+
+<section>
+   <div class="container grid-200-auto">
+      <div class="side-nav">
+         <a href="#">All Events</a><br>
+         <a href="#">Wedding day</a><br>
+         <a href="#">Rehearsal dinner</a>
+      </div>
+
+      <div class="main-content">
+         <div class="filter flex-btwn">
+            <div>
+               <span>Filter by:</span>
+               <select name="rsvp" id="rsvp">
+                  <option value="" hidden>RSVP Status</option>
+                  <option value="">Pending</option>
+                  <option value="">Attending</option>
+                  <option value="">Declined</option>
+               </select>
+            </div>
+
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addGuest">
+               <i class="fas fa-plus"></i>
+               <span>New Guest</span>
+            </button>
+         </div>
+
+         <br><br>
+
+         {% if guests %}
+         <table class="table">
+            <thead>
+               <tr>
+                  <th>Name</th>
+                  <th>RSVP Status</th>
+                  <th>Note</th>
+                  <th></th>
+               </tr>
+            </thead>
+
+            <tbody class="table">
+            {% for guest in guests %}
+               <tr>
+                  <td>
+                     <div class="name">{{ guest.name }}</div>
+                     <div class="contact">
+                        <a href="tel:{{ guest.phone_number }}"><i class="fas fa-phone-alt"></i></a>
+                        <a href="mailto:{{ guest.email }}"><i class="fas fa-envelope"></i></a>
+                     </div>
+                  </td>
+                  <td>
+                     <select name="rsvp" id="rsvp">
+                        <option value="">Pending</option>
+                        <option value="">Attending</option>
+                        <option value="">Declined</option>
+                     </select>
+                  </td>
+                  <td>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quia reprehenderit modi harum tempore dolor quam, in molestias aspernatur assumenda velit!</td>
+                  <td><i class="fas fa-ellipsis-h"></i></td>
+               </tr>
+            {% endfor %}
+            </tbody>
+         </table>
+         {% else %}
+            <div class="center">
+               <br><br><br>
+               <h4>No guests added yet!</h4>
+            </div>
+         {% endif %}
+      </div>
+   </div>
+</section>
+
+{% endblock %}

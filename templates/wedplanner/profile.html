@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %} User profile {% endblock %}
+
+{% block body %}
+{% include 'include/header.html' %}
+
+<div class="container center">
+   <br><br><br>
+   <h2>Welcome, {{ user.username }}! </h2>
+   <p>This is your profile page!</p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+<header id="header" style="padding-top: 2rem;">
+   <div class="container flex-btwn">
+      <a href="{% url 'home' %}" class="logo">
+         <span>dreamWed</span>
+      </a>
+
+      <nav class="nav">
+         {% if not user.is_authenticated %}
+            <a href="{% url 'vendors' %}" class="nav__item">
+               <span>Vendors</span>
+            </a>
+         {% endif %}
+         {% if user.is_wedding_planner %}
+            <a href="{% url 'checklist' user_id=user.id %}" class="nav__item">
+               <span>Planning tools</span>
+            </a>
+            <a href="{% url 'vendors' %}" class="nav__item">
+               <span>Vendors</span>
+            </a>
+            <a href="{% url 'bookmarks' user_id=user.id %}" class="nav__item">
+               <span>Saved</span>
+            </a>
+         {% elif user.is_vendor %}
+            <a href="{% url 'user-profile' user_id=user.id %}" class="nav__item">
+               <span>My vendor profile</span>
+            </a>
+            <a href="#" class="nav__item">
+               <span>Inquiries</span>
+            </a>
+            <a href="#" class="nav__item">
+               <span>Pricing requests</span>
+            </a>
+         {% endif %}
+      </nav>
+
+      <div class="accountinfo">
+         {% if user.is_authenticated %}
+            <span>
+               Logged in:
+               <i class="fas fa-account circle"></i>
+               <a href="{% url 'user-profile' user_id=user.id %}"><strong>{{ user.username }}</strong></a>
+            </span>
+            <a href="{% url 'logout' %}">LOGOUT</a>
+         {% else %}
+            <a href="{% url 'register' %}">Create account</a>
+            <a href="{% url 'login' %}">Login</a>
+         {% endif %}
+      </div>
+   </div>
+</header>
+
+<br><hr><br>

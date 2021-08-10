@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ vendor.business_name }} {% endblock %}
+
+{% block body %}
+{% include 'include/header.html' %}
+
+<section class="intro">
+   <div class="container">
+      <div class="flex-btwn">
+         <h2>{{ vendor.business_name }}</h2>
+         <div class="cta">
+            <a href="#">Save vendor</a>
+            <a href="#">Request pricing</a>
+         </div>
+      </div>
+   </div>
+</section>
+
+<main>
+   <div class="container grid-200-auto">
+      <div class="side-nav">
+         <a href="#">Gallery</a><br>
+         <a href="#">Description</a><br>
+         <a href="#">Reviews</a><br>
+
+         <!-- cta -->
+         <div class="cta" style="margin-top: 4rem;">
+            <button>Request pricing</button><br>
+            <button style="margin-top: 7px;">Save vendor</button>
+         </div>
+      </div>
+
+      <div class="main-content">
+         <div class="img">
+            <img
+               src="https://www.brides.com/thmb/0sOaZ3sx3JI5fdvHe3Gej0x813o=/3759x2114/filters:fill(auto,1)/__opt__aboutcom__coeus__resources__content_migration__brides__proteus__585acc1e54421cf15eb0e0b8__169-6741927d00934d1d942b4e2e8c2ab990.jpeg"
+               alt="">
+         </div>
+
+         <div class="para">
+            <h3>About this business</h3>
+            <p>{{ vendor.description }}</p>
+         </div>
+         
+         <div class="para">
+            <h3>Services offered</h3>
+            <p>{{ vendor.services_offered }}</p>
+         </div>
+
+         <br><br>
+
+         <section class="reviews">
+            <h2>Reviews (15)</h2>
+            <div>
+               <span>SORT BY:</span>
+               <select name="sort" id="sort">
+                  <option value="">Newest</option>
+                  <option value="">Oldest</option>
+                  <option value="">High rating</option>
+                  <option value="">Low rating</option>
+               </select>
+            </div><br><br>
+
+            <div class="review flex">
+               <div class="initials">BT</div>
+               <div class="msg">
+                  <strong>Benjamin TheBest</strong><br>
+                  <span>Married on July 3, 2021</span>
+
+                  <div class="stars">
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                  </div>
+
+                  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores ipsum nisi adipisci accusantium officia deleniti repellendus vel blanditiis commodi sapiente? Voluptatum blanditiis nobis hic voluptate obcaecati eum repudiandae accusantium. Quis sunt a pariatur architecto provident nostrum, repellendus porro nesciunt sed ipsum! Necessitatibus laborum rerum architecto est maiores, eaque corporis dolor?</p>
+               </div>
+            </div><br>
+
+            <div class="review flex">
+               <div class="initials">KH</div>
+               <div class="msg">
+                  <strong>Kevin Hart</strong><br>
+                  <span>Married on July 3, 2021</span>
+
+                  <div class="stars">
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                  </div>
+
+                  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores ipsum nisi adipisci accusantium officia deleniti repellendus vel blanditiis commodi sapiente? Voluptatum blanditiis nobis hic voluptate obcaecati eum repudiandae accusantium. Quis sunt a pariatur architecto provident nostrum, repellendus porro nesciunt sed ipsum! Necessitatibus laborum rerum architecto est maiores, eaque corporis dolor?</p>
+               </div>
+            </div><br>
+            
+            <div class="review flex">
+               <div class="initials">AO</div>
+               <div class="msg">
+                  <strong>Another One</strong><br>
+                  <span>Married on July 3, 2021</span>
+
+                  <div class="stars">
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                     <i class="fas fa-star"></i>
+                  </div>
+
+                  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores ipsum nisi adipisci accusantium officia deleniti repellendus vel blanditiis commodi sapiente? Voluptatum blanditiis nobis hic voluptate obcaecati eum repudiandae accusantium. Quis sunt a pariatur architecto provident nostrum, repellendus porro nesciunt sed ipsum! Necessitatibus laborum rerum architecto est maiores, eaque corporis dolor?</p>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+</main>   
+
+{% endblock %}
