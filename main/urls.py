@@ -23,7 +23,6 @@ from main.settings import LOGIN_URL, LOGOUT_URL
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('dreamwed.urls')),
-    # path('U/', include('django.contrib.auth.urls')),
     path('U/register/', dreamwed.register, name='register'),
     path('U/register/vendor', vendor.VendorRegView.as_view(), name='vendor-register'),
     path('U/register/wedding-planner', wedplanner.WeddingPlannerRegView.as_view(), name='wedding-planner-register'),

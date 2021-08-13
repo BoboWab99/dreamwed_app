@@ -7,28 +7,8 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 
 from main.decorators import wedding_planner_required, unauthenticated_user
-from main.settings import HOME
 from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm
 from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Bookmark
-
-
-# NOT SURE WHERE THIS SHOULD BE DONE
-def get_vendor(user_id):
-   vendor = None
-   vendor_list = Vendor.objects.filter(user_id=user_id)
-   if len(vendor_list) > 0:
-      vendor = vendor_list[0]
-
-   return vendor
-
-
-def get_wedding_planner(user_id):
-   wedding_planner = None
-   wed_planner_list = WeddingPlanner.objects.filter(user_id=user_id)
-   if len(wed_planner_list) > 0:
-      wedding_planner = wed_planner_list[0]
-
-   return wedding_planner
 
 
 # ========= VENDORS =========
@@ -38,7 +18,7 @@ def vendors(request):
 
 
 def vendor_details(request, user_id):
-   vendor = get_vendor(user_id)
+   vendor = Vendor.objects.get(user_id=user_id)
    return render(request, 'wedplanner/vendor-details.html', {'vendor': vendor})
 
 
@@ -72,11 +52,13 @@ def guest_list(request, user_id):
 @login_required
 @wedding_planner_required
 def check_list(request, user_id):
-   todos = Todo.objects.filter(user_id=request.user.id)
+   all_todos = Todo.objects.filter(user_id=request.user.id)
+
    form = TodoForm()
    context = {
-      'todos': todos,
+      'todos': all_todos,
       'form': form,
+      'no_task_msg': 'No wedding tasks created yet!',
    }
    return render(request, 'wedplanner/checklist.html', context)
 
@@ -89,6 +71,7 @@ def tasks_in_progress(request, user_id):
    context = {
       'todos': todos_in_progress,
       'form': form,
+      'no_task_msg': 'You have no pending tasks!',
    }
    return render(request, 'wedplanner/checklist.html', context)
 
@@ -101,6 +84,7 @@ def tasks_completed(request, user_id):
    context = {
       'todos': completed_todos,
       'form': form,
+      'no_task_msg': 'You haven\'t completed any task yet!',
    }
    return render(request, 'wedplanner/checklist.html', context)
 
@@ -111,7 +95,6 @@ def tasks_completed(request, user_id):
 def create_task(request, user_id):
    form = TodoForm(request.POST)
    if not form.is_valid():
-      # FIX: Empty form fields
       return HttpResponse('Form ain\'t valid!')
 
    task_content = form.cleaned_data['content']
@@ -127,24 +110,25 @@ def create_task(request, user_id):
       due_date=due_date, 
       )
    new_task.save()
-   return redirect(HOME)
+   return redirect(request.META.get('HTTP_REFERER'))
    
 
 @login_required
 @wedding_planner_required
 def delete_task(request, user_id, task_id):
-   task_to_delete = Todo.objects.filter(user_id=request.user.id, id=task_id)
+   task_to_delete = Todo.objects.get(user_id=request.user.id, id=task_id)
    task_to_delete.delete()
-   return redirect(HOME)
+   return redirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
 @wedding_planner_required
 @require_http_methods('POST')
-def update_task(request, user_id, task_id):
+def update_task(request, page, user_id, task_id):
+   task = Todo.objects.get(id=task_id, user_id=request.user.id)
+
    form = TodoForm(request.POST)
    if not form.is_valid():
-      # FIX: Empty form fields
       return HttpResponse('Form ain\'t valid!')
 
    task_content = form.cleaned_data['content']
@@ -159,21 +143,25 @@ def update_task(request, user_id, task_id):
       category = task_category,
       cost=task_cost, 
       due_date=due_date,
+      completed=task.completed
       )
    task_to_update.save()
-   return redirect(HOME)
+   return redirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
 @wedding_planner_required
-@require_http_methods('POST')
+@require_http_methods('GET')
 def mark_task_as_complete(request, user_id, task_id):
-   task = Todo.objects.filter(user_id=request.user.id, id=task_id)[0]
-   # data = TodoForm(request.POST)
-   print(request.POST)
-   # task.completed=True
-   # task.save()
-   return redirect(HOME)
+   task = Todo.objects.get(user_id=request.user.id, id=task_id)
+   
+   if task.completed == True:
+      task.completed = False
+   else:
+      task.completed = True
+
+   task.save()
+   return redirect(request.META.get('HTTP_REFERER'))
 
 
 # ========= BUDGETER =========

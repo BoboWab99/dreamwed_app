@@ -20,12 +20,20 @@ admin.site.register(VendorCategory)
 
 # @admin.register(Vendor)
 # class VendorAdmin(admin.ModelAdmin):
-#    fields = ['business_name', 'category', 'city', 'location']
+#    fields = ['user' ,'business_name', 'category', 'city', 'location']
+#    list_display = ['user' ,'business_name', 'category', 'city', 'location']
 
 
 # @admin.register(WeddingPlanner)
 # class WeddingPlannerAdmin(admin.ModelAdmin):
-#    fields = ['user']
+#    fields = ['user', 'wedding_date']
+#    list_display = ['user', 'wedding_date']
+
+
+# @admin.register(Todo)
+# class TodoAdmin(admin.ModelAdmin):
+#    fields = ['user', 'content', 'category', 'completed']
+#    list_display = ['user', 'content', 'category', 'completed']
 
 
 

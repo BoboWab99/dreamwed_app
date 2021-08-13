@@ -85,7 +85,7 @@ class Todo(models.Model):
       )
 
    def __str__(self):
-      return self.content
+      return f'{self.content}, {self.completed}'
 
 
 class Bookmark(models.Model):

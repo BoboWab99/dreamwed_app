@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from django.forms.widgets import DateInput, Select
+from django.forms.widgets import DateInput
 
 from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Review, VendorCategory
 
@@ -60,7 +60,10 @@ class WeddingPlannerRegForm(UserCreationForm):
    first_name = forms.CharField(required=True)  
    last_name = forms.CharField(required=True)
    email = forms.EmailField(required=True)
-   wedding_date = forms.DateTimeField(required=False)
+   wedding_date = forms.DateField(
+      required=False, 
+      widget=DateInput(attrs={'type': 'date'}),
+      )
 
    class Meta(UserCreationForm.Meta):
       model = User
@@ -90,7 +93,6 @@ class TodoForm(ModelForm):
       fields = ['content', 'category', 'cost', 'due_date']
       widgets = {
          'due_date': DateInput(attrs={'type': 'date'}),
-         'category': Select(choices=VENDOR_CATEGORY_CHOICES)
       }
 
 

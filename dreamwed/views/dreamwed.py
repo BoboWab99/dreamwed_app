@@ -9,16 +9,6 @@ from main.settings import LOGIN_URL, HOME
 from dreamwed.models import User
 
 
-# NOT SURE WHERE THIS SHOULD BE DONE
-def get_user(user_id):
-   user = None
-   user_list = User.objects.filter(id=user_id)
-   if len(user_list) > 0:
-      user = user_list[0]
-
-   return user
-
-
 def home(request):
    if not request.user.is_authenticated:
       return render(request, 'dreamwed/index.html')
@@ -27,12 +17,12 @@ def home(request):
    if request.user.is_vendor:
       return redirect('user-profile', user_id=user_id)
    else:
-      return redirect('checklist', user_id=user_id)
+      return redirect('checklist-all', user_id=user_id)
 
 
 @login_required
 def user_profile(request, user_id):
-   requested_user = get_user(user_id)
+   requested_user = User.objects.get(id=user_id)
    curr_user = request.user
 
    if not requested_user.id == curr_user.id:

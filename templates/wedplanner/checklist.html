@@ -56,7 +56,7 @@
             </button>
          </div>
 
-         <div class="modal-body">            
+         <div class="modal-body">
          {% for field in form.visible_fields %}
             <div class="form-group">
                {{ field.label_tag }}
@@ -85,18 +85,19 @@
 <section>
    <div class="container grid-200-auto">
       <div class="side-nav">
-         <a href="#">All Tasks</a><br>
-         <a href="#">In progress</a><br>
-         <a href="#">Completed</a>
+         <a href="{% url 'checklist-all' user.id %}">All Tasks</a><br>
+         <a href="{% url 'checklist-in-progress' user.id %}">In progress</a><br>
+         <a href="{% url 'checklist-completed' user.id %}">Completed</a>
       </div>
 
       <div class="main-content">
          <div class="filter flex-btwn">
-            <div>
+            <div class="flex">
                <span>Filter by:</span>
-               {{ form.category }}
                
-               <select name="due-date" id="due-date">
+               {% render_field form.category class+="filter-todo-category form-control" %}
+               
+               <select name="due-date" id="filter-due-date" class="form-control">
                   <option value="" hidden>Due date</option>
                   <option value="">Today</option>
                   <option value="">This week</option>
@@ -106,7 +107,6 @@
                </select>
             </div>
 
-            <!-- Button trigger add new task modal -->
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTask">
                <i class="fas fa-plus"></i>
                <span>New Task</span>
@@ -130,9 +130,8 @@
             {% for todo in todos %}
                <tr>
                   <td>
-                     <form id="markComplete" action="{% url 'mark-task-as-complete' user_id=user.id task_id=todo.id %}">
-                        
-                        <input type="checkbox" value="{{ todo.completed }}" onchange="this.form.submit()">
+                     <form name="markComplete" action="{% url 'mark-task-as-complete' user_id=user.id task_id=todo.id %}">
+                        <input type="checkbox" value="{{ todo.completed }}" class="form-control change_task_complete" onchange="this.form.submit()">
                      </form>
 
                      <!-- HELP UPDATING TASKS -->
@@ -140,9 +139,8 @@
                      <input type="text" id="todo_{{ todo.id }}_category" value="{{ todo.category_id }}" disabled>
                      <input type="number" id="todo_{{ todo.id }}_cost" value="{{ todo.cost }}" disabled>
                      <input type="date" id="todo_{{ todo.id }}_date" value="{{ todo.due_date|date:'Y-m-d' }}" disabled>
-                     <input type="checkbox" id="todo_{{ todo.id }}_completed" value="{{ todo.completed }}" disabled>
                   </td>
-                  <td class="pointer" title="Click to update this task." data-user-id="{{ user.id }}" data-task-id="{{ todo.id }}" data-toggle="modal" data-target="#updateTask" onclick="updateTask(this.getAttribute('data-user-id'), this.getAttribute('data-task-id'));">
+                  <td class="pointer" title="Click to update this task." data-task-id="{{ todo.id }}" data-toggle="modal" data-target="#updateTask" onclick="updateTask(this.getAttribute('data-task-id'));">
                      <div class="task">{{ todo.content }}</div>
                      <span class="task-label">{{ todo.category }}</span>
                   </td>
@@ -161,13 +159,17 @@
          {% else %}
             <div class="center">
                <br><br><br>
-               <h4>No wedding task added yet!</h4>
+               <h4>{{ no_task_msg }}</h4>
             </div>
          {% endif %}
       </div>
    </div>
 </section>
 
+{% endblock %}
+
+
+{% block scripts %}
 <script>
 
    function fillTaskSavedValues(taskId) {
@@ -175,34 +177,44 @@
       var taskCategoryClass = 'todo_' + taskId + '_category';
       var taskCostClass = 'todo_' + taskId + '_cost';
       var taskDueDateClass = 'todo_' + taskId + '_date';
-      var taskCompletedClass = 'todo_' + taskId + '_completed';
 
       var taskContent = document.getElementById(taskContentClass).value;
       var taskCategory = document.getElementById(taskCategoryClass).value;
       var taskCost = document.getElementById(taskCostClass).value;
       var taskDueDate = document.getElementById(taskDueDateClass).value;
-      var taskCompleted = document.getElementById(taskCompletedClass).value;
 
       var updateForm = document.getElementById('updateTaskForm');
       updateForm.querySelector('#id_content').value = taskContent;
       updateForm.querySelector('#id_category').value = taskCategory;
       updateForm.querySelector('#id_cost').value = taskCost;
       updateForm.querySelector('#id_due_date').value = taskDueDate;
-      updateForm.querySelector('#id_completed').value = taskCompleted;
    }
 
-   function updateTask(userId, taskId) {
-      var actionUrl = taskId + '/update';
+   function updateTask(taskId) {
+      actionUrl = taskId + '/update';
       document.forms.updateTaskForm.action = actionUrl;
       fillTaskSavedValues(taskId);
    }
 
-   // document.getElementById('markComplete').querySelectorAll('#id_completed').forEach(checkbox => {
-   //    checkbox.addEventListener('change', function() {
-   //       this.form.submit();
-   //    });
-   // });
+   window.addEventListener('load', () => {
+      document.querySelectorAll('.change_task_complete').forEach(checkbox => {
+         if (checkbox.value == 'False') {
+            checkbox.checked = false
+         } else {
+            checkbox.checked = true;
+         }
+      });
+   });
+
+   // BOOTSTRAP FILTER
+   $(document).ready(function () {
+      $(".filter-todo-category").on("change", function () {
+         var value = $(this).children("option:selected").text().toLowerCase();
+         $(".task-label").filter(function () {
+            $(this).parent().parent().toggle($(this).text().toLowerCase().indexOf(value) > -1)
+         });
+      });
+   });
 
 </script>
-
 {% endblock %}

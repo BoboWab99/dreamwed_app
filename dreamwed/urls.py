@@ -14,9 +14,11 @@ urlpatterns = [
 urlpatterns += [
    path('vendors/', wedplanner.vendors, name='vendors'),
    path('vendors/<int:user_id>/details', wedplanner.vendor_details, name='vendor-details'),
-   path('U/<int:user_id>/checklist/', wedplanner.check_list, name='checklist'),
+   path('U/<int:user_id>/checklist/all/', wedplanner.check_list, name='checklist-all'),
+   path('U/<int:user_id>/checklist/in-progress/', wedplanner.tasks_in_progress, name='checklist-in-progress'),
+   path('U/<int:user_id>/checklist/completed/', wedplanner.tasks_completed, name='checklist-completed'),
    path('U/<int:user_id>/checklist/<int:task_id>/delete', wedplanner.delete_task, name='delete-task'),
-   path('U/<int:user_id>/checklist/<int:task_id>/update', wedplanner.update_task, name='update-task'),
+   path('U/<int:user_id>/checklist/<str:page>/<int:task_id>/update', wedplanner.update_task, name='update-task'),
    path('U/<int:user_id>/checklist/<int:task_id>/mark-complete', wedplanner.mark_task_as_complete, name='mark-task-as-complete'),
 
    path('U/<int:user_id>/guestlist/', wedplanner.guest_list, name='guestlist'),

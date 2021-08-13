@@ -11,17 +11,17 @@
             </a>
          {% endif %}
          {% if user.is_wedding_planner %}
-            <a href="{% url 'checklist' user_id=user.id %}" class="nav__item">
+            <a href="{% url 'checklist-all' user.id %}" class="nav__item">
                <span>Planning tools</span>
             </a>
             <a href="{% url 'vendors' %}" class="nav__item">
                <span>Vendors</span>
             </a>
-            <a href="{% url 'bookmarks' user_id=user.id %}" class="nav__item">
+            <a href="{% url 'bookmarks' user.id %}" class="nav__item">
                <span>Saved</span>
             </a>
          {% elif user.is_vendor %}
-            <a href="{% url 'user-profile' user_id=user.id %}" class="nav__item">
+            <a href="{% url 'user-profile' user.id %}" class="nav__item">
                <span>My vendor profile</span>
             </a>
             <a href="#" class="nav__item">
@@ -38,7 +38,7 @@
             <span>
                Logged in:
                <i class="fas fa-account circle"></i>
-               <a href="{% url 'user-profile' user_id=user.id %}"><strong>{{ user.username }}</strong></a>
+               <a href="{% url 'user-profile' user.id %}"><strong>{{ user.username }}</strong></a>
             </span>
             <a href="{% url 'logout' %}">LOGOUT</a>
          {% else %}

@@ -7,10 +7,13 @@ body {
    padding: 0 0 4rem;
 }
 
-img {
-   max-width: 100%;
+.form-control.change_task_complete {
+   display: inline-block;
+   width: 20px;
+   height: 20px;
 }
 
+img {max-width: 100%;}
 .modal-body {background: #f9f9f9;}
 textarea.form-control {height: 70px;   }
 label {margin-bottom: 2px;}
