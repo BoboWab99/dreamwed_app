@@ -6,9 +6,61 @@ from django.views.generic import CreateView
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 
+import datetime as DT
+import json
+
 from main.decorators import wedding_planner_required, unauthenticated_user
 from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm
 from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Bookmark
+
+
+def date_filter():
+   today = DT.date.today()
+   print(today.weekday())
+   this_week_start = today - DT.timedelta(days=today.weekday())
+   this_week_end = this_week_start + DT.timedelta(days=6)
+
+   this_month_start = today.replace(day=1)
+   last_month_end = this_month_start - DT.timedelta(days=1)
+   last_month_start = this_month_start - DT.timedelta(days=last_month_end.day)
+
+   date_filter = {
+      'today': today,
+      'this_week': {
+         'start_week': this_week_start,
+         'end_week': this_week_end,
+      },
+      'last_week': {
+         'start_week': this_week_start - DT.timedelta(days=7),
+         'end_week': this_week_start - DT.timedelta(days=1),
+      },
+      'two_weeks_ago': {
+         'start_week': this_week_start - DT.timedelta(days=14),
+         'end_week': this_week_start - DT.timedelta(days=8),
+      },
+      'one_month_ago': {
+         'start_month': last_month_start,
+         'end_month': last_month_end,
+      },
+   }
+   return date_filter
+
+
+def get_keys(dict):
+   keys = {}
+   for key in dict.keys():
+      key_name = key.replace('_', ' ').capitalize()
+      keys.update({key: key_name})
+   return keys
+
+
+# date filter
+date_filter = date_filter()
+date_filter_keys = get_keys(date_filter)
+
+print()
+print(date_filter)
+print()
 
 
 # ========= VENDORS =========
@@ -53,11 +105,12 @@ def guest_list(request, user_id):
 @wedding_planner_required
 def check_list(request, user_id):
    all_todos = Todo.objects.filter(user_id=request.user.id)
-
    form = TodoForm()
    context = {
       'todos': all_todos,
       'form': form,
+      'date_filter': date_filter,
+      'date_filter_keys': date_filter_keys,
       'no_task_msg': 'No wedding tasks created yet!',
    }
    return render(request, 'wedplanner/checklist.html', context)
@@ -71,6 +124,8 @@ def tasks_in_progress(request, user_id):
    context = {
       'todos': todos_in_progress,
       'form': form,
+      'date_filter': date_filter,
+      'date_filter_keys': date_filter_keys,
       'no_task_msg': 'You have no pending tasks!',
    }
    return render(request, 'wedplanner/checklist.html', context)
@@ -84,6 +139,8 @@ def tasks_completed(request, user_id):
    context = {
       'todos': completed_todos,
       'form': form,
+      'date_filter': date_filter,
+      'date_filter_keys': date_filter_keys,
       'no_task_msg': 'You haven\'t completed any task yet!',
    }
    return render(request, 'wedplanner/checklist.html', context)
