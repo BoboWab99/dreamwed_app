@@ -92,13 +92,18 @@
       <div class="main-content">
          <div class="filter flex-btwn">
             <div class="flex">
-               <span>Filter by:</span>
-               
+               <span>FILTER BY:</span>
+               <div class="form-group">
+                  <label for="">Category:</label>
                {% render_field form.category class+="filter-todos filter-category form-control" %}
+               </div>
                
-               <select name="due-date" id="filter-due-date" class="filter-todos filter-date form-control">
-                  <option value="" selected>---------</option>
-               </select>
+               <div class="form-group">
+                  <label for="">Due date:</label>
+                  <select name="due-date" id="filter-due-date" class="filter-todos filter-date form-control">
+                     <option value="" selected>---------</option>
+                  </select>
+               </div>
             </div>
 
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTask">
