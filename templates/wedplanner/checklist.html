@@ -91,18 +91,20 @@
 
       <div class="main-content">
          <div class="filter flex-btwn">
-            <div class="flex">
-               <span>FILTER BY:</span>
-               <div class="form-group">
-                  <label for="">Category:</label>
-               {% render_field form.category class+="filter-todos filter-category form-control" %}
-               </div>
-               
-               <div class="form-group">
-                  <label for="">Due date:</label>
-                  <select name="due-date" id="filter-due-date" class="filter-todos filter-date form-control">
-                     <option value="" selected>---------</option>
-                  </select>
+            <div class="filter">
+               <span>FILTER BY:</span><br>
+               <div class="flex">
+                  <div class="form-group" style="margin: 0;">
+                     <label for="">Category:</label>
+                     {% render_field form.category class+="filter-todos filter-category form-control" %}
+                  </div>
+                  
+                  <div class="form-group" style="margin: 0;">
+                     <label for="">Due date:</label>
+                     <select name="due-date" id="filter-due-date" class="filter-todos filter-date form-control">
+                        <option value="" selected>---------</option>
+                     </select>
+                  </div>
                </div>
             </div>
 
