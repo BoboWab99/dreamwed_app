@@ -4,7 +4,6 @@
 {% block title %} Task Master {% endblock %}
 
 {% block body %}
-
 <!-- Add New Task Modal -->
 <div class="modal fade" id="addTask" tabindex="-1" role="dialog" aria-labelledby="addTaskTitle"
    aria-hidden="true">
@@ -99,9 +98,6 @@
                
                <select name="due-date" id="filter-due-date" class="filter-todos filter-date form-control">
                   <option value="" selected>---------</option>
-                  {% for key, value in date_filter_keys.items %}
-                     <option value="{{ key }}">{{ value }}</option>
-                  {% endfor %}
                </select>
             </div>
 
@@ -126,7 +122,7 @@
 
             <tbody>
             {% for todo in todos %}
-               <tr>
+               <tr class="checklist-item">
                   <td>
                      <form name="markComplete" action="{% url 'mark-task-as-complete' user_id=user.id task_id=todo.id %}">
                         <input type="checkbox" value="{{ todo.completed }}" class="form-control change_task_complete" onchange="this.form.submit()">
@@ -144,7 +140,7 @@
                   </td>
                   <td style="text-transform: capitalize;">
                      {% if todo.due_date %}
-                     {{ todo.due_date|date:'d/m/Y' }}
+                     <span class="todo-due-date">{{ todo.due_date|date:'d/m/Y' }}</span>
                      {% endif %}
                   </td>
                   <td>
@@ -163,143 +159,11 @@
       </div>
    </div>
 </section>
-
 {% endblock %}
 
 
 {% block scripts %}
-<script>
-
-   function fillTaskSavedValues(taskId) {
-      var taskContentClass = 'todo_' + taskId + '_content';
-      var taskCategoryClass = 'todo_' + taskId + '_category';
-      var taskCostClass = 'todo_' + taskId + '_cost';
-      var taskDueDateClass = 'todo_' + taskId + '_date';
-
-      var taskContent = document.getElementById(taskContentClass).value;
-      var taskCategory = document.getElementById(taskCategoryClass).value;
-      var taskCost = document.getElementById(taskCostClass).value;
-      var taskDueDate = document.getElementById(taskDueDateClass).value;
-
-      var updateForm = document.getElementById('updateTaskForm');
-      updateForm.querySelector('#id_content').value = taskContent;
-      updateForm.querySelector('#id_category').value = taskCategory;
-      updateForm.querySelector('#id_cost').value = taskCost;
-      updateForm.querySelector('#id_due_date').value = taskDueDate;
-   }
-
-   function updateTask(taskId) {
-      actionUrl = taskId + '/update';
-      document.forms.updateTaskForm.action = actionUrl;
-      fillTaskSavedValues(taskId);
-   }
-
-   window.addEventListener('load', () => {
-      document.querySelectorAll('.change_task_complete').forEach(checkbox => {
-         if (checkbox.value == 'False') {
-            checkbox.checked = false
-         } else {
-            checkbox.checked = true;
-         }
-      });
-   });
-
-   function formatDate(date) {
-      var dd = String(date.getDate()).padStart(2, '0');
-      var mm = String(date.getMonth() + 1).padStart(2, '0'); // January is 0!
-      var yyyy = date.getFullYear();
-
-      formatted_date = dd + '/' + mm + '/' + yyyy;
-      return formatted_date;
-   }
-
-   
-   function handle_dates() {
-      var today = new Date();
-      var today_dd = today.getDate();
-
-      var this_week_start = new Date(today);
-      this_week_start.setDate(today_dd - today.getDay());
-      var this_week_end = new Date(this_week_start);
-      this_week_end.setDate(this_week_start.getDate() + 6);
-
-      var last_week_end = new Date(this_week_start);
-      last_week_end.setDate(this_week_start.getDate() - 1);
-      var last_week_start = new Date(this_week_start);
-      last_week_start.setDate(this_week_start.getDate() - 7);
-
-      var two_weeks_ago_end = new Date(last_week_start);
-      two_weeks_ago_end.setDate(last_week_start.getDate() - 1);
-      var two_weeks_ago_start = new Date(last_week_start);
-      two_weeks_ago_start.setDate(last_week_start.getDate() - 7);
-
-      var this_month_start = new Date(today);
-      this_month_start.setDate(1);
-      var last_month_end = new Date(this_month_start);
-      last_month_end.setDate(this_month_start.getDate() - 1);
-      var last_month_start = new Date(last_month_end);
-      last_month_start.setDate(1);
-
-      // format dates
-      today = formatDate(today);
-      this_week_start = formatDate(this_week_start);
-      this_week_end = formatDate(this_week_end);
-      last_week_start = formatDate(last_week_start);
-      last_week_end = formatDate(last_week_end);
-      two_weeks_ago_start = formatDate(two_weeks_ago_start);
-      two_weeks_ago_end = formatDate(two_weeks_ago_end);
-      last_month_start = formatDate(last_month_start);
-      last_month_end = formatDate(last_month_end);
-
-      var date_filter = {
-         'today': today,
-         'this_week': {
-            'start_week': this_week_start,
-            'end_week': this_week_end,
-         },
-         'last_week': {
-            'start_week': last_week_start,
-            'end_week': last_week_end,
-         },
-         'two_weeks_ago': {
-            'start_week': two_weeks_ago_start,
-            'end_week': two_weeks_ago_end,
-         },
-         'one_month_ago': {
-            'start_month': last_month_start,
-            'end_month': last_month_end,
-         },
-      };
-
-      console.log(date_filter);
-   }
-
-   handle_dates();
-
-   
-   // JQUERY FILTER FOR TODOS
-   // https://stackoverflow.com/questions/60571466/how-can-i-use-2-dropdown-filters-with-bootstrap-4-in-html
-
-   $(document).ready(function () {
-      $('.filter-todos').on('change', function () {
-         var category = $('.filter-category').children("option:selected").text().toLowerCase();
-         var date = $('.filter-date').children("option:selected").text().toLowerCase();
-         var defaultSelected = '---------';
-
-         $('.task-label').each(function () {
-            var todo = $(this).parent().parent();
-            var todoCategory = $(this).text().toLowerCase();
-
-            if (category == defaultSelected && date == defaultSelected) {
-               todo.show();
-            } else if (category == defaultSelected || date == defaultSelected) {
-               todo.toggle((todoCategory.includes(category) || todoCategory.includes(date)));
-            } else {
-               todo.toggle((todoCategory.includes(category) && todoCategory.includes(date)));
-            }
-         });
-      });
-   });
-
-</script>
+{% load static %}
+<script src="{% static 'js/todos.js' %}"></script>
 {% endblock %}
+
