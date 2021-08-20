@@ -7,14 +7,18 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 
 from main.decorators import wedding_planner_required, unauthenticated_user
-from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm
+from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, VENDOR_CATEGORY_CHOICES
 from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Bookmark
 
 
 # ========= VENDORS =========
 def vendors(request):
    vendors = Vendor.objects.all()
-   return render(request, 'wedplanner/vendors.html', {'vendors': vendors})
+   context = {
+      'vendor_categories': VENDOR_CATEGORY_CHOICES,
+      'vendors': vendors,
+   }
+   return render(request, 'wedplanner/vendors.html', context)
 
 
 def vendor_details(request, user_id):

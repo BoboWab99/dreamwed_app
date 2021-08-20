@@ -105,7 +105,7 @@ function getDateFilter() {
    var lastMonthStart = new Date(lastMonthEnd);
    lastMonthStart.setDate(1);
 
-   var dateFilter = {
+   const dateFilter = {
       today: {
          start: today,
          end: today,
@@ -142,3 +142,9 @@ function camelCaseToNormalText(ccText) {
    const result = ccText.replace(/([A-Z])/g, " $1").toLowerCase();
    return result.charAt(0).toUpperCase() + result.slice(1); // capitalize first letter
 }
+
+
+// change todo status with async
+// async function changeTaskStatus(taskId) {
+//    let response = await fetch('')
+// }
