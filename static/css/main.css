@@ -17,7 +17,7 @@ img {max-width: 100%;}
 .modal-body {background: #f9f9f9;}
 textarea.form-control {height: 70px;   }
 label {margin-bottom: 2px;}
-.center {text-align: center;}
+/* .center {text-align: center;} */
 input:disabled {display: none;}
 .pointer {cursor: pointer;}
 
@@ -33,15 +33,15 @@ input:disabled {display: none;}
    content: 'HINT: ';
 }
 
-.flex {
+/* .flex {
    display: flex;
    gap: 10px;
-}
+} */
 
 .flex-btwn {
    display: flex;
    align-items: flex-end;
-   justify-content: space-between;
+   justify-content: space-around;
 }
 
 .grid-4 {
@@ -84,4 +84,21 @@ input:disabled {display: none;}
    max-width: 450px;
    margin-left: auto;
    margin-right: auto;
+}
+
+/* HOME PAGE */
+/* .stater {
+   background: url(assets/pic1.jpg);
+   background-position: center;
+   background-size: cover;           
+} */
+#thebackground{
+   background-image: url("../images/sectionimg.jpg");
+   height:130vh;
+   background-position: center;
+   background-repeat: no-repeat;
+   background-size:cover;
+}
+section{
+   padding-top: 50px;
 }
