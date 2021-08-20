@@ -11,7 +11,7 @@ from dreamwed.models import User
 
 def home(request):
    if not request.user.is_authenticated:
-      return render(request, 'dreamwed/index.html')
+      return render(request, 'dreamwed/home.html')
 
    user_id = request.user.id
    if request.user.is_vendor:
