@@ -13,9 +13,7 @@
 
          <div class="modal-header">
             <h5 class="modal-title" id="addTaskTitle">Add new task</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-               <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
 
          <div class="modal-body">            
@@ -34,7 +32,7 @@
          </div>
 
          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Save task</button>
          </div>
       </form>
@@ -50,9 +48,7 @@
 
          <div class="modal-header">
             <h5 class="modal-title" id="updateTaskTitle">Update task</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-               <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
 
          <div class="modal-body">
@@ -71,7 +67,7 @@
          </div>
 
          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Update task</button>
          </div>
       </form>
@@ -90,16 +86,16 @@
       </div>
 
       <div class="main-content">
-         <div class="filter flex-btwn">
-            <div class="filter">
+         <div class="d-flex justify-content-between align-items-end">
+            <div>
                <span>FILTER BY:</span><br>
-               <div class="flex">
-                  <div class="form-group" style="margin: 0;">
+               <div class="d-flex sm-gap">
+                  <div class="form-group m-0">
                      <label for="">Category:</label>
                      {% render_field form.category class+="filter-todos filter-category form-control" %}
                   </div>
                   
-                  <div class="form-group" style="margin: 0;">
+                  <div class="form-group m-0">
                      <label for="">Due date:</label>
                      <select name="due-date" id="filter-due-date" class="filter-todos filter-date form-control">
                         <option value="" selected>---------</option>
@@ -108,7 +104,7 @@
                </div>
             </div>
 
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTask">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTask">
                <i class="fas fa-plus"></i>
                <span>New Task</span>
             </button>
@@ -132,7 +128,7 @@
                <tr class="checklist-item">
                   <td>
                      <form name="markComplete" action="{% url 'mark-task-as-complete' user_id=user.id task_id=todo.id %}">
-                        <input type="checkbox" value="{{ todo.completed }}" class="form-control change_task_complete" onchange="this.form.submit()">
+                        <input type="checkbox" value="{{ todo.completed }}" class="form-check-input change_task_complete" onchange="this.form.submit()">
                      </form>
 
                      <!-- HELP UPDATING TASKS -->
@@ -141,7 +137,7 @@
                      <input type="number" id="todo_{{ todo.id }}_cost" value="{{ todo.cost }}" disabled>
                      <input type="date" id="todo_{{ todo.id }}_date" value="{{ todo.due_date|date:'Y-m-d' }}" disabled>
                   </td>
-                  <td class="pointer" title="Click to update this task." data-task-id="{{ todo.id }}" data-toggle="modal" data-target="#updateTask" onclick="updateTask(this.getAttribute('data-task-id'));">
+                  <td class="pointer" title="Click to update this task." data-task-id="{{ todo.id }}" data-bs-toggle="modal" data-bs-target="#updateTask" onclick="updateTask(this.getAttribute('data-task-id'));">
                      <div class="task">{{ todo.content }}</div>
                      <span class="task-label">{{ todo.category }}</span>
                   </td>

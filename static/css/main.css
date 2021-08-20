@@ -7,19 +7,24 @@ body {
    padding: 0 0 4rem;
 }
 
-.form-control.change_task_complete {
+input[type='checkbox'] {
    display: inline-block;
    width: 20px;
    height: 20px;
 }
 
+a {text-decoration: none;}
 img {max-width: 100%;}
 .modal-body {background: #f9f9f9;}
-textarea.form-control {height: 70px;   }
+textarea.form-control {height: 70px;}
 label {margin-bottom: 2px;}
-/* .center {text-align: center;} */
 input:disabled {display: none;}
+
 .pointer {cursor: pointer;}
+section {padding: 2rem 0;}
+.center {text-align: center;}
+.big-gap {gap: 25%;}
+.sm-gap {gap: 0.5rem;}
 
 .help-text {
    display: block;
@@ -31,17 +36,6 @@ input:disabled {display: none;}
 
 .help-text::before {
    content: 'HINT: ';
-}
-
-/* .flex {
-   display: flex;
-   gap: 10px;
-} */
-
-.flex-btwn {
-   display: flex;
-   align-items: flex-end;
-   justify-content: space-around;
 }
 
 .grid-4 {
@@ -60,7 +54,7 @@ input:disabled {display: none;}
    text-transform: uppercase;
    font-size: 12px;
    background: #ddd;
-   color: var(--blue);
+   color: var(--bs-blue);
    padding: 3px 5px;
    border-radius: 3px;
    opacity: 0.7;
@@ -84,14 +78,21 @@ input:disabled {display: none;}
    max-width: 450px;
    margin-left: auto;
    margin-right: auto;
+   margin: 0 auto 1rem;
 }
 
-/* HOME PAGE */
-/* .stater {
-   background: url(assets/pic1.jpg);
-   background-position: center;
-   background-size: cover;           
-} */
+a.bookmark {
+   position: absolute;
+   top: 1rem;
+   right: 1rem;
+   font-size: 20px;
+}
+
+.vendors .cta a {
+   text-transform: uppercase;
+   font-size: 14px;
+}
+
 #thebackground{
    background-image: url("../images/sectionimg.jpg");
    height:130vh;
@@ -99,6 +100,126 @@ input:disabled {display: none;}
    background-repeat: no-repeat;
    background-size:cover;
 }
-section{
-   padding-top: 50px;
+
+/* TOOLS NAV */
+#tools-nav {border-bottom: 1px solid #ccc;}
+#tools-nav .tool + .tool {
+   margin-left: 3rem;
+}
+#tools-nav .tool .fas {
+   font-size: 1.7rem;
+   margin-bottom: 10px;
+}
+
+
+/* navbar */
+#navbar {background: steelblue;}
+#navbar a {color: #eee;}
+
+#navbar .nav-secondary {
+   max-height: 0;
+   overflow: hidden;
+   transform: translate(-100%, 0);
+   transition: 0.25s ease-in-out;
+}
+
+#navbar .nav-right .nav-links {
+   padding-top: 1rem;
+   border-top: 1px solid #aaa;
+}
+
+#navbar .nav-middle .nav-links {
+   padding: 1.4rem 0 1rem;
+}
+#navbar.show-nav .nav-secondary {
+   transform: translate(0);
+}
+#navbar .nav-secondary a {
+   display: block;
+   padding: 12px 0;
+}
+
+
+
+/* wab menu */
+#menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  min-height: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+#menu .bars {
+  width: 22px;
+  height: 3px;
+  display: inline-block;
+  background: #fff;
+  border-radius: 2px;
+  position: relative;
+  transition: 0.25s ease-in-out;
+}
+
+#menu .bars::before, 
+#menu .bars::after {
+  width: inherit;
+  height: inherit;
+  position: absolute;
+  left: 0;
+  background: inherit;
+  border-radius: inherit;
+  content: '';
+  transition: 0.25s ease-in-out;
+}
+
+#menu .bars::before {top: -6px;}
+#menu .bars::after {bottom: -6px;}
+#menu.active .bars {
+  background: transparent !important;
+}
+
+#menu.active .bars::before, 
+#menu.active .bars::after {
+  background: #fff;
+  transform-origin: center;
+}
+#menu.active .bars::before {
+  transform: translate(0, 6px) rotate(45deg);
+}
+#menu.active .bars::after {
+  transform: translate(0, -6px) rotate(-45deg);
+}
+
+
+@media screen and (min-width: 800px) {
+   #menu {display: none;}
+
+   #navbar .container {
+      display: flex;
+      justify-content: space-between;
+   }
+
+   #navbar .nav-secondary {
+      max-height: initial !important;
+      overflow: initial !important;
+      transform: translate(0) !important;
+   }
+   
+   #navbar .nav-secondary .nav-links {
+      height: 100%;
+      display: flex;
+      align-items: center;
+   }
+
+   #navbar .nav-right .nav-links {
+      padding: 0;
+      border: none;
+   }
+
+   #navbar .nav-middle .nav-links {padding: 0;}
+   #navbar .nav-secondary a {padding: 0;}
+   #navbar .nav-secondary a + a {margin-left: 10px;}
 }

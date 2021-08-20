@@ -26,6 +26,13 @@ def vendor_details(request, user_id):
    return render(request, 'wedplanner/vendor-details.html', {'vendor': vendor})
 
 
+@login_required
+@wedding_planner_required
+def bookmark_vendor(request, user_id, vendor_id):
+   # Working on it
+   return redirect(request.META.get('HTTP_REFERER'))
+
+
 # ========= REGISTRATION =========
 @method_decorator(unauthenticated_user, name='dispatch')
 class WeddingPlannerRegView(CreateView):
