@@ -81,14 +81,26 @@ section {padding: 2rem 0;}
    margin: 0 auto 1rem;
 }
 
-a.bookmark {
+.vendors-page .bookmark {
+   --size: 45px;
+
    position: absolute;
-   top: 1rem;
-   right: 1rem;
+   top: 0.5rem;
+   right: 0.5rem;
    font-size: 20px;
+   color: #fff;
+   width: var(--size);
+   height: var(--size);
+   border-radius: 50%;
+   box-shadow: -2px 5px 10px rgba(255, 255, 255, 0.4);
 }
 
-.vendors .cta a {
+
+.vendors-page .bookmark input:checked ~ .fas {
+   color: orangered;
+}
+
+.vendors-page .cta a {
    text-transform: uppercase;
    font-size: 14px;
 }

@@ -7,7 +7,7 @@
 
 <section class="intro">
    <div class="container">
-      <div class="flex-btwn">
+      <div class="d-flex justify-content-between py-3">
          <h2>{{ vendor.business_name }}</h2>
          <div class="cta">
             <a href="#">Save vendor</a>
@@ -25,25 +25,25 @@
          <a href="#">Reviews</a><br>
 
          <!-- cta -->
-         <div class="cta" style="margin-top: 4rem;">
-            <button>Request pricing</button><br>
-            <button style="margin-top: 7px;">Save vendor</button>
+         <div class="cta mt-3">
+            <button type="button" class="btn btn-primary">Request pricing</button><br>
+            <button type="button" class="btn btn-light mt-1">Save vendor</button>
          </div>
       </div>
 
       <div class="main-content">
          <div class="img">
             <img
-               src="https://www.brides.com/thmb/0sOaZ3sx3JI5fdvHe3Gej0x813o=/3759x2114/filters:fill(auto,1)/__opt__aboutcom__coeus__resources__content_migration__brides__proteus__585acc1e54421cf15eb0e0b8__169-6741927d00934d1d942b4e2e8c2ab990.jpeg"
+               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2ZstL_2V9eO2cQi61ic9Bc1DsR5y2956eZw&usqp=CAU"
                alt="">
          </div>
 
-         <div class="para">
+         <div class="mt-5">
             <h3>About this business</h3>
             <p>{{ vendor.description }}</p>
          </div>
          
-         <div class="para">
+         <div class="mt-5">
             <h3>Services offered</h3>
             <p>{{ vendor.services_offered }}</p>
          </div>
@@ -62,8 +62,8 @@
                </select>
             </div><br><br>
 
-            <div class="review flex">
-               <div class="initials">BT</div>
+            <div class="review d-flex">
+               <div class="initials me-2">BT</div>
                <div class="msg">
                   <strong>Benjamin TheBest</strong><br>
                   <span>Married on July 3, 2021</span>
@@ -80,8 +80,8 @@
                </div>
             </div><br>
 
-            <div class="review flex">
-               <div class="initials">KH</div>
+            <div class="review d-flex">
+               <div class="initials me-2">KH</div>
                <div class="msg">
                   <strong>Kevin Hart</strong><br>
                   <span>Married on July 3, 2021</span>
@@ -98,8 +98,8 @@
                </div>
             </div><br>
             
-            <div class="review flex">
-               <div class="initials">AO</div>
+            <div class="review d-flex">
+               <div class="initials me-2">AO</div>
                <div class="msg">
                   <strong>Another One</strong><br>
                   <span>Married on July 3, 2021</span>

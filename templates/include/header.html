@@ -14,12 +14,12 @@
             {% endif %}
             
             {% if user.is_wedding_planner %}
-            <a href="{% url 'checklist-all' user.id %}">Planning tools</a>
+            <a href="{% url 'checklist-all' %}">Planning tools</a>
             <a href="{% url 'vendors' %}">Vendors</a>
-            <a href="{% url 'bookmarks' user.id %}">Saved</a>
+            <a href="{% url 'bookmarks' %}">Saved</a>
             
             {% elif user.is_vendor %}
-            <a href="{% url 'user-profile' user.id %}">My vendor profile</a>
+            <a href="{% url 'user-profile' %}">My vendor profile</a>
             <a href="#">Inquiries</a>
             <a href="#">Pricing requests</a>
             {% endif %}
@@ -29,7 +29,7 @@
       <div class="nav-secondary nav-right">
          <div class="nav-links">
             {% if user.is_authenticated %}
-            <a href="{% url 'user-profile' user.id %}">Logged in:
+            <a href="{% url 'user-profile' %}">Logged in:
                <strong>{{ user.username }}</strong>
             </a>
             <a href="{% url 'logout' %}">LOGOUT</a>

@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 
-{% block title %} Budget manager {% endblock %}
+{% block title %} Budget manager {% endblock title %}
 
 {% block body %}
 
-<!-- Modal -->
+<!-- Add new expense Modal -->
 <div class="modal fade" id="addExpense" tabindex="-1" role="dialog" aria-labelledby="addExpenseTitle" aria-hidden="true">
-   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-      <form action="" method="POST" class="modal-content">
+   <div class="modal-dialog modal-dialog-scrollable" role="document">
+      <form onsubmit="createBudgetItem(event)" name="createBudgetItemForm" class="modal-content">
+         {% csrf_token %}
+
          <div class="modal-header">
             <h5 class="modal-title" id="addExpenseTitle">Add new expense</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -33,7 +35,43 @@
 
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save Expense</button>
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save Expense</button>
+         </div>
+      </form>
+   </div>
+</div>
+
+<!-- Update expense Modal -->
+<div class="modal fade" id="updateExpense" tabindex="-1" role="dialog" aria-labelledby="updateExpenseTitle" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-scrollable" role="document">
+      <form onsubmit="updateBudgetItem(event)" name="updateBudgetItemForm" class="modal-content">
+         {% csrf_token %}
+
+         <div class="modal-header">
+            <h5 class="modal-title" id="updateExpenseTitle">Update budget item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+
+         <div class="modal-body">
+            <div class="modal-body">
+               {% for field in form.visible_fields %}
+               <div class="form-group">
+                  {{ field.label_tag }}
+                  {% render_field field class+="form-control"%}
+                  {% if field.help_text %}
+                     <span class="help-text">{{ field.help_text }}</span>
+                  {% endif %}
+                  {% for error in field.erros %}
+                     <span style="color:red">{{ error }}</span>
+                  {% endfor %}
+               </div>
+               {% endfor %}
+            </div>
+         </div>
+
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Update Expense</button>
          </div>
       </form>
    </div>
@@ -45,12 +83,10 @@
 <section>
    <div class="container grid-200-auto">
       <div class="side-nav">
-         <a href="#">All</a><br>
-         <a href="#">Venue</a><br>
-         <a href="#">Catering</a><br>
-         <a href="#">Dress & Attire</a><br>
-         <a href="#">Transportation</a><br>
-         <a href="#">Accomodation</a><br>
+         <a class="pointer" onclick="getAllbudgetItems()">All</a><br>
+         {% for category in expense_categories %}
+         <a class="pointer" data-exp-category-id="{{ category.id }}" onclick="getExpensesInCategory(this.getAttribute('data-exp-category-id'))">{{ category.name }}</a><br>
+         {% endfor %}
       </div>
 
       <div class="main-content">
@@ -59,10 +95,11 @@
                <span>FILTER BY:</span>
                <div class="form-group mx-2 mb-0">
                   <label for="">Payment Status:</label>
-                  <select name="rsvp" id="rsvp" class="form-select">
-                     <option value="">Fully paid</option>
-                     <option value="">Partially paid</option>
-                     <option value="">Not paid</option>
+                  <select name="rsvp-filter" id="rsvp-filter" class="form-select">
+                     <option value="" selected>---------</option>
+                     <option value="full">Fully paid</option>
+                     <option value="partial">Partially paid</option>
+                     <option value="no">Not paid</option>
                   </select>
                </div>
             </div>
@@ -75,38 +112,29 @@
 
          <br><br>
 
-         {% if expenses %}
-            <table class="table">
-               <thead>
-                  <tr>
-                     <th>Expense</th>
-                     <th>Estimated cost</th>
-                     <th>Paid</th>
-                     <th></th>
-                  </tr>
-               </thead>
-               <tbody>
-                     {% for expense in expenses %}
-                        <tr>
-                           <td>
-                              <div class="expense">{{ expense.description }}</div>
-                              <a href="#">ADD NOTE</a>
-                           </td>
-                           <td>KES {{ expense.cost }}</td>
-                           <td>KES 30,000</td>
-                           <td><i class="fas fa-trash-alt"></i></td>
-                        </tr>
-                     {% endfor %}
-               </tbody>
-            </table>
-         {% else %}
-            <div class="center">
-               <br><br><br>
-               <h4>No budget item added yet!</h4>
-            </div>
-         {% endif %}
+         <table class="table" id="BudgetItemsTable">
+            <thead>
+               <tr>
+                  <th>Expense</th>
+                  <th>Estimated cost</th>
+                  <th>Paid</th>
+                  <th></th>
+               </tr>
+            </thead>
+
+            <tbody></tbody>
+         </table>
+         <!-- <div class="center">
+            <br><br><br>
+            <h4>No budget item added yet!</h4>
+         </div> -->
       </div>
    </div>
 </section>
+{% endblock body %}
 
-{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script src="{% static 'js/budgeter.js' %}"></script>
+{% endblock scripts %}

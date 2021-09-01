@@ -16,16 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from dreamwed.views import dreamwed, vendor, wedplanner
-from main.settings import LOGIN_URL, LOGOUT_URL
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('dreamwed.urls')),
-    path('U/register/', dreamwed.register, name='register'),
-    path('U/register/vendor', vendor.VendorRegView.as_view(), name='vendor-register'),
-    path('U/register/wedding-planner', wedplanner.WeddingPlannerRegView.as_view(), name='wedding-planner-register'),
-    path('U/login/', dreamwed.user_login, name=LOGIN_URL),
-    path('U/logout/', dreamwed.user_logout, name=LOGOUT_URL),
 ]

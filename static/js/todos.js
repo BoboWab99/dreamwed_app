@@ -1,44 +1,41 @@
 // TODOS PAGE
 
+const tasksTableBody = document.querySelector('#todosTable tbody');
+const dateFilterSelect = document.getElementById('filter-due-date');
+const categoryFilterSelect = document.querySelector('select.filter-category');
+
+
 window.addEventListener('load', () => {
-   const dateFilterSelect = document.getElementById('filter-due-date');
    const dateFilter = getDateFilter();
 
    // Populate Date Filter Options
-   for (var key in dateFilter) {
-      var dateFilterOption = document.createElement('option');
+   for (let key in dateFilter) {
+      let dateFilterOption = document.createElement('option');
       dateFilterOption.value = key;
       dateFilterOption.innerHTML = camelCaseToNormalText(key);
       dateFilterSelect.appendChild(dateFilterOption);
    }
-
-   // Handle Check/Uncheck Todo Status Checkbox
-   document.querySelectorAll('.change_task_complete').forEach(checkbox => {
-      if (checkbox.value == 'False') {
-         checkbox.checked = false;
-      } else {
-         checkbox.checked = true;
-      }
-   });
+   getAllTasks();
 });
 
-// JQUERY FILTER FOR TODOS
+
+// JQuery Filter For Todos
 $(document).ready(function () {
    $('.filter-todos').on('change', function () {
-      var categoryFilter = $('.filter-category').children("option:selected").text().toLowerCase();
-      var dateFilter = $('.filter-date').children("option:selected").val();
-      var noFilter = '---------';
+      let categoryFilter = $('.filter-category').children("option:selected").text().toLowerCase();
+      let dateFilter = $('.filter-date').children("option:selected").val();
+      let noFilter = '---------';
 
       $('.checklist-item').each(function () {
-         var todoCategory = $(this).find('.task-label').text().toLowerCase();
-         var todoDueDate = $(this).find('.todo-due-date').text(); // dd/mm/yyyy
+         let todoCategory = $(this).find('.task-label').text().toLowerCase();
+         let todoDueDate = $(this).find('.todo-due-date').text(); // dd/mm/yyyy
 
-         var dateValues = todoDueDate.split('/');
-         var dd = Number(dateValues[0]);
-         var mm = Number(dateValues[1] - 1);
-         var yyyy = Number(dateValues[2]);
+         let dateValues = todoDueDate.split('/');
+         let dd = Number(dateValues[0]);
+         let mm = Number(dateValues[1] - 1);
+         let yyyy = Number(dateValues[2]);
 
-         var jsDate = new Date(yyyy, mm, dd);
+         let jsDate = new Date(yyyy, mm, dd);
          jsDate.setHours(0, 0, 0, 0);
 
          // Show/Hide Todos
@@ -53,98 +50,159 @@ $(document).ready(function () {
    });
 });
 
-function fillTaskSavedValues(taskId) {
-   var taskContentClass = 'todo_' + taskId + '_content';
-   var taskCategoryClass = 'todo_' + taskId + '_category';
-   var taskCostClass = 'todo_' + taskId + '_cost';
-   var taskDueDateClass = 'todo_' + taskId + '_date';
 
-   var taskContent = document.getElementById(taskContentClass).value;
-   var taskCategory = document.getElementById(taskCategoryClass).value;
-   var taskCost = document.getElementById(taskCostClass).value;
-   var taskDueDate = document.getElementById(taskDueDateClass).value;
+// Todo Status Check/Uncheck
+function handleTodoStatus() {
+   document.querySelectorAll('.change_task_complete').forEach(checkbox => {
+      if (checkbox.value == 'false') {
+         checkbox.checked = false;
+      } else if (checkbox.value == 'true') {
+         checkbox.checked = true;
+      } else {
+         console.error('Task status not set!');
+      }
+   });
+}
 
+
+// empty todo filters when navigating all/completed/in-progress tasks
+async function emptyFilters() {
+   categoryFilterSelect.value = '';
+   dateFilterSelect.value = '';
+}
+
+
+// fills update task form with selected task values
+async function fillTaskSavedValues(jsonTask) {
+   let task = JSON.parse(jsonTask);
    const updateForm = document.getElementById('updateTaskForm');
-   updateForm.querySelector('#id_content').value = taskContent;
-   updateForm.querySelector('#id_category').value = taskCategory;
-   updateForm.querySelector('#id_cost').value = taskCost;
-   updateForm.querySelector('#id_due_date').value = taskDueDate;
+
+   updateForm.querySelector('#id_content').value = task.content;
+   updateForm.querySelector('#id_category').value = validateOutput(task.vendor_category_id);
+   updateForm.querySelector('#id_due_date').value = task.due_date;
+   updateForm.setAttribute('data-task-id', task.todo_id);
 }
 
-function updateTask(taskId) {
-   actionUrl = taskId + '/update';
-   document.forms.updateTaskForm.action = actionUrl;
-   fillTaskSavedValues(taskId);
+
+// TASK CRUD OPERATIONS
+// retrieve tasks 
+function renderTodos(tasks) {
+   tasksTableBody.innerHTML = '';
+
+   tasks.forEach(todo => {
+
+      let jsonTodo = JSON.stringify(todo);
+
+      let tableRow = `
+      <tr class="checklist-item">
+         <td>
+            <input type="checkbox" name="todo-${todo.todo_id}-status" value="${todo.completed}" class="form-check-input change_task_complete" onchange="changeTaskStatus(${todo.todo_id})">
+         </td>
+         <td class="pointer" title="Click to update this task." data-bs-toggle="modal" data-bs-target="#updateTask" onclick='fillTaskSavedValues(\`${jsonTodo}\`)'>
+            <div class="task">${todo.content}</div>
+            <span class="task-label">${validateOutput(todo.vendor_category_name)}</span>
+         </td>
+         <td style="text-transform: capitalize;">
+            <span class="todo-due-date">${formatDate(todo.due_date)}</span>
+         </td>
+         <td>
+            <a class="pointer" onclick="deleteTask(${todo.todo_id})"><i class="fas fa-trash-alt"></i></a>
+         </td>
+      </tr>
+      `;
+      
+      tasksTableBody.innerHTML += tableRow;
+   });
 }
 
-function getDateFilter() {
-   const today = new Date();
-   today.setHours(0, 0, 0, 0);
-   const todayWeekDay = (today.getDay() + 6) % 7; // Monday=0, Tuesday=1, ..., Sunday=6
+async function getAllTasks() {
+   let url = `${LOCALHOST}/U/checklist/`;
+   fetchRequest(fetchTasksHelper, url, 'GET');
+}
 
-   var thisMonthStart = new Date(today);
-   thisMonthStart.setDate(1);
+async function getCompletedTasks() {
+   let url = `${LOCALHOST}/U/checklist/completed/`;
+   fetchRequest(fetchTasksHelper, url, 'GET');
+}
 
-   var thisWeekStart = new Date(today);
-   thisWeekStart.setDate(today.getDate() - todayWeekDay);
-   var thisWeekEnd = new Date(thisWeekStart);
-   thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
+async function getTasksInProgress() {
+   let url = `${LOCALHOST}/U/checklist/in-progress/`;
+   fetchRequest(fetchTasksHelper, url, 'GET');
+}
 
-   var lastWeekEnd = new Date(thisWeekStart);
-   lastWeekEnd.setDate(thisWeekStart.getDate() - 1);
-   var lastWeekStart = new Date(thisWeekStart);
-   lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+async function fetchTasksHelper(response) {
+   let tasks = await response.json();
 
-   var twoWeeksAgoEnd = new Date(lastWeekStart);
-   twoWeeksAgoEnd.setDate(lastWeekStart.getDate() - 1);
-   var twoWeeksAgoStart = new Date(lastWeekStart);
-   twoWeeksAgoStart.setDate(lastWeekStart.getDate() - 7);
+   renderTodos(tasks);
+   emptyFilters();
+   handleTodoStatus();
+}
 
-   var lastMonthEnd = new Date(thisMonthStart);
-   lastMonthEnd.setDate(thisMonthStart.getDate() - 1);
-   var lastMonthStart = new Date(lastMonthEnd);
-   lastMonthStart.setDate(1);
 
-   const dateFilter = {
-      today: {
-         start: today,
-         end: today,
-      },
-      thisWeek: {
-         start: thisWeekStart,
-         end: thisWeekEnd,
-      },
-      lastWeek: {
-         start: lastWeekStart,
-         end: lastWeekEnd,
-      },
-      twoWeeksAgo: {
-         start: twoWeeksAgoStart,
-         end: twoWeeksAgoEnd,
-      },
-      oneMonthAgo: {
-         start: lastMonthStart,
-         end: lastMonthEnd,
-      },
+// create task
+async function createTask(event) {
+   event.preventDefault();
+
+   let createTaskForm = event.target;
+   let formData = new FormData(createTaskForm);
+   let url = `${LOCALHOST}/U/create-task/`;
+   createUpdateTaskHelper(url, formData);
+}
+
+
+// update task
+async function updateTask(event) {
+   event.preventDefault();
+
+   let updateTaskForm = event.target;
+   let taskId = updateTaskForm.getAttribute('data-task-id');
+   let formData = new FormData(updateTaskForm);
+   let url = `${LOCALHOST}/U/checklist/${taskId}/update`;
+   createUpdateTaskHelper(url, formData);
+}
+
+async function createUpdateTaskHelper(url, formData) {
+   let taskContent = formData.get('content');
+   let taskCategory = formData.get('category');
+   let taskDueDate = formData.get('due_date');
+
+   let todo = {
+      content: taskContent,
+      category: taskCategory,
+      due_date: taskDueDate,
    };
 
-   return dateFilter;
-}
-
-function passesDateFilter(filterOption, date) {
-   const dateFilter = getDateFilter();
-
-   if (!dateFilter.hasOwnProperty(filterOption)) { return true; }
-   return date >= dateFilter[filterOption].start && date <= dateFilter[filterOption].end;
-}
-
-function camelCaseToNormalText(ccText) {
-   const result = ccText.replace(/([A-Z])/g, " $1").toLowerCase();
-   return result.charAt(0).toUpperCase() + result.slice(1); // capitalize first letter
+   let handleResponse = async function (response) {
+      await response.json()
+         .then(res => console.log(res.msg));
+      emptyFilters();
+      getAllTasks();
+   }
+   fetchRequest(handleResponse, url, 'POST', JSON.stringify(todo));
 }
 
 
-// change todo status with async
-// async function changeTaskStatus(taskId) {
-//    let response = await fetch('')
-// }
+// delete task 
+async function deleteTask(taskId) {
+   let url = `${LOCALHOST}/U/checklist/${taskId}/delete`;
+
+   let handleResponse = async function (response) {
+      await response.json()
+         .then(res => console.log(res.msg));
+      getAllTasks();
+   }
+   fetchRequest(handleResponse, url, 'DELETE');
+}
+
+
+// change task status
+async function changeTaskStatus(taskId) {
+   let url = `${LOCALHOST}/U/checklist/${taskId}/mark-complete`;
+
+   let handleResponse = async function (response) {
+      await response.json()
+         .then(res => console.log(res.msg));
+      getAllTasks();
+   }
+   fetchRequest(handleResponse, url, 'GET');
+}

@@ -17,4 +17,4 @@ class VendorRegView(CreateView):
    def form_valid(self, form):
       user = form.save()
       login(self.request, user)
-      return redirect('user-profile', user_id=user.id)
+      return redirect('user-profile')

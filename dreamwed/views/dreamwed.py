@@ -2,31 +2,26 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponse
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
 
 from main.decorators import unauthenticated_user
 from main.settings import LOGIN_URL, HOME
-from dreamwed.models import User
 
 
 def home(request):
    if not request.user.is_authenticated:
       return render(request, 'dreamwed/home.html')
 
-   user_id = request.user.id
    if request.user.is_vendor:
-      return redirect('user-profile', user_id=user_id)
+      return redirect('user-profile')
    else:
-      return redirect('checklist-all', user_id=user_id)
+      return redirect('checklist-all')
 
 
 @login_required
-def user_profile(request, user_id):
-   requested_user = User.objects.get(id=user_id)
+def user_profile(request):
    curr_user = request.user
-
-   if not requested_user.id == curr_user.id:
-      return HttpResponse('You do not have access to this account!')
 
    if curr_user.is_vendor:
       return render(request, 'vendor/profile.html')
@@ -65,3 +60,7 @@ def user_login(request):
 def user_logout(request):
    logout(request)
    return redirect(HOME)
+
+
+def get_csrf(request):
+   return JsonResponse({'csrf_token': get_token(request)}, status=200)

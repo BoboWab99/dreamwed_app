@@ -90,7 +90,7 @@ class TodoForm(ModelForm):
    """Create new Todo form"""
    class Meta:
       model = Todo
-      fields = ['content', 'category', 'cost', 'due_date']
+      fields = ['content', 'category', 'due_date']
       widgets = {
          'due_date': DateInput(attrs={'type': 'date'}),
       }
@@ -100,7 +100,7 @@ class BudgetItemForm(ModelForm):
    """Add new wedding expense form"""
    class Meta:
       model = BudgetItem
-      fields = ['description', 'cost']
+      fields = ['description', 'expense_category', 'cost']
 
 
 class ReviewForm(ModelForm):
@@ -115,9 +115,3 @@ class GuestForm(ModelForm):
    class Meta:
       model = Guest
       fields = ['name', 'email', 'phone_number', 'rsvp']
-
-
-class DateForm(forms.Form):
-   """Custom Django date input field"""
-   date = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'])
-

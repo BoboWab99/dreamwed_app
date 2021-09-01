@@ -6,9 +6,6 @@ from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 
 
-DEFAULT_USER_FOR_EXPENSE_CATEGORY = 0
-
-
 class VendorCategory(models.Model):
    """Model representing a wedding vendor category. 
    Vendor categories are added by the Admin in the database. """
@@ -20,7 +17,6 @@ class VendorCategory(models.Model):
 
 class User(AbstractUser):
    """Model representing a general system user"""
-   # handle user type
    is_vendor = models.BooleanField(default=False)
    is_wedding_planner = models.BooleanField(default=False)
 
@@ -39,7 +35,13 @@ class Vendor(models.Model):
    """Model representing a system user who is a vendor"""
    user = models.OneToOneField(User, on_delete=CASCADE, primary_key=True)
    business_name = models.CharField(max_length=100)
-   category = models.ForeignKey(VendorCategory, on_delete=SET_NULL, null=True, help_text='Select a category for your business.')
+   category = models.ForeignKey(
+      VendorCategory, 
+      on_delete=SET_NULL, 
+      null=True, 
+      help_text='Select a category for your business.',
+      )
+
    description = models.TextField(max_length=5000)
    services_offered = models.TextField(max_length=5000)
    city = models.CharField(max_length=500)
@@ -50,7 +52,7 @@ class Vendor(models.Model):
       return reverse('vendor-details', args=[str(self.id)])
 
    def __str__(self):
-      return self.business_name
+      return f'{self.user}: {self.business_name}'
 
 
 class WeddingPlanner(models.Model):
@@ -58,25 +60,19 @@ class WeddingPlanner(models.Model):
    user = models.OneToOneField(User, on_delete=CASCADE, primary_key=True)
    wedding_date = models.DateField(blank=True, null=True)
 
-   def __str__(self) -> str:
-      return self.user
+   def __str__(self):
+      return f'{self.user}'
 
 
 class Todo(models.Model):
    """Model representing a to-do task during wedding planning"""
-   user = models.ForeignKey(WeddingPlanner, on_delete=models.CASCADE)
+   wedplanner = models.ForeignKey(WeddingPlanner, on_delete=models.CASCADE)
    content = models.TextField(max_length=5000)
    category = models.ForeignKey(VendorCategory, on_delete=SET_NULL, blank=True, null=True)
    due_date = models.DateField(
       blank=True, 
       null=True, 
       help_text='When would you like to have this done?',
-      )
-
-   cost = models.FloatField(
-      blank=True, 
-      null=True, 
-      help_text='Would you like to create a budget for this task?',
       )
       
    completed = models.BooleanField(
@@ -85,16 +81,19 @@ class Todo(models.Model):
       )
 
    def __str__(self):
-      return f'{self.content}, {self.completed}'
+      return f'{self.wedplanner}: {self.content}'
 
 
 class Bookmark(models.Model):
    """Model representing a user who's planning a wedding"""
-   user = models.ForeignKey(WeddingPlanner, on_delete=models.CASCADE)
+   wedplanner = models.ForeignKey(WeddingPlanner, on_delete=models.CASCADE)
    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
 
+   class Meta:
+      unique_together = ('wedplanner', 'vendor',)
+
    def __str__(self):
-      return self.vendor
+      return f'{self.wedplanner}, {self.vendor}'
 
 
 class Guest(models.Model):
@@ -125,7 +124,7 @@ class Guest(models.Model):
       ordering = ['rsvp']
 
    def __str__(self):
-      return self.name
+      return f'{self.wedplanner}: {self.name}'
 
 
 class ExpenseCategory(models.Model):
@@ -133,15 +132,27 @@ class ExpenseCategory(models.Model):
    Some general expense categories are pre-defined by the admin in the System.
    However, users have the right to add more categories of their own"""
    name = models.CharField(max_length=200, help_text='Categorize your expenses for proper budgeting.')
-   user = models.ForeignKey(WeddingPlanner, on_delete=CASCADE, default=DEFAULT_USER_FOR_EXPENSE_CATEGORY)
+   wedplanner = models.ForeignKey(WeddingPlanner, on_delete=CASCADE, blank=True, null=True)
+
+   def __str__(self):
+      return self.name
 
 
 class BudgetItem(models.Model):
    """Model representing an wedding budget item"""
    wedplanner = models.ForeignKey(User, on_delete=models.CASCADE)
+   expense_category = models.ForeignKey(ExpenseCategory, on_delete=SET_NULL, blank=True, null=True)
    description = models.TextField(max_length=500)
-   cost = models.FloatField(blank=True, null=True)
-   paid = models.FloatField(blank=True, null=True)
+   cost = models.FloatField(
+      blank=True, 
+      null=True,
+      help_text='What is the estimated cost of this budget item?',
+      )
+   paid = models.FloatField(
+      blank=True, 
+      null=True,
+      help_text='How much have you paid for this budget item so far?',
+      )
 
    @property
    def is_balance_cleared(self):
@@ -150,12 +161,12 @@ class BudgetItem(models.Model):
       return False
 
    def __str__(self):
-      return self.description
+      return f'{self.wedplanner}: {self.description}'
 
 
 class Review(models.Model):
    """Model representing a wedding planner rating of a vendor's service"""
-   user = models.ForeignKey(WeddingPlanner, on_delete=models.CASCADE)
+   wedplanner = models.ForeignKey(WeddingPlanner, on_delete=models.CASCADE)
    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
    stars = models.SmallIntegerField()
    comment = models.TextField(max_length=5000)
@@ -165,5 +176,4 @@ class Review(models.Model):
       ordering = ['date_posted']
 
    def __str__(self):
-      return self.comment
-
+      return f'{self.wedplanner} to {self.vendor}: {self.comment}'
