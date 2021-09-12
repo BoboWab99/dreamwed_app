@@ -70,18 +70,24 @@
    </div>
 </div>
 
-<section class="py-4">
-   <div class="row justify-content-center m-0">
-      <div class="col-4 border border-1 rounded bg-light py-5 d-flex justify-content-center">
-         <div class="text-center">
+<section class="py-2">
+   <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center text-center">
+      <div class="col">
+         <div class=" border border-1 rounded bg-light py-5">
             <h6>New messages</h5>
-               <h1 class="text-muted">10</h1>
+            <h1 class="text-muted">10</h1>
          </div>
       </div>
-      <div class="col-4 ms-4 border border-1 rounded bg-light py-5 d-flex justify-content-center">
-         <div class="text-center">
+      <div class="col">
+         <div class=" border border-1 rounded bg-light py-5">
             <h6>New pricing requests</h5>
-               <h1 class="text-muted">05</h1>
+            <h1 class="text-muted">05</h1>
+         </div>
+      </div>
+      <div class="col">
+         <div class=" border border-1 rounded bg-light py-5">
+            <h6>New comments</h5>
+            <h1 class="text-muted">05</h1>
          </div>
       </div>
    </div>
@@ -140,24 +146,26 @@
    </li>
 </ul>
 
-<h5 class="text-center mt-5">{{ user.vendor.business_name }} Gallery</h5>
+<div class="mt-5 mb-4 text-center">
+   <h5 class="mb-0">{{ user.vendor.business_name }} Gallery</h5>
+   <p class="text-muted">You can add your business images up to 5 images.</p>
+</div>
 
 <div class="text-center">
-   <div class="py-3">
-      <button type="button" id="upload-picture-btn" class="btn btn-primary" data-bs-toggle="modal"
-         data-bs-target="#uploadPicture">
-         <i class="fas fa-plus"></i>
-         <span class="ms-1">New Picture</span>
-      </button>
-   </div>
+   <button type="button" id="upload-picture-btn" class="btn btn-primary mb-4" data-bs-toggle="modal"
+      data-bs-target="#uploadPicture">
+      <i class="fas fa-plus"></i>
+      <span class="ms-1">New Picture</span>
+   </button>
 
-   <div class="row row-cols-1 row-cols-md-3 g-4 py-3">
+   <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center py-3">
       {% for img_file in images %}
          <figure class="col vendor-img" data-img-id="{{ img_file.id }}">
-            {% if img_file.image %}
-               <img src="{{ img_file.image.url }}" class="d-block w-100" height="140" alt="">
-            {% endif %}
-            <figcaption class="caption my-2">{{ img_file.caption }}</figcaption> 
+            <div class="d-flex align-items-end overflow-hidden" style="height: 140px;">
+               <img src="{{ img_file.image.url }}" class="d-block w-100" alt="">
+            </div>
+            <figcaption class="my-2">{{ img_file.caption }}</figcaption> 
+
             <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updatePicture"
                onclick="fillImageSavedValues(this.parentElement)">
                <i class="fas fa-pencil-alt"></i>
@@ -171,7 +179,10 @@
       {% endfor %}
    </div>
 
-   <p class="mt-5"><b>ALT: Carousel</b></p>
+   <div class="mt-5 mb-4 text-center">
+      <h5 class="mb-0">Gallery Preview</h5>
+      <p class="text-muted">This is how end users view your pictures.</p>
+   </div>
 
    <div id="carouselVendorPictures" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-indicators">
@@ -182,19 +193,12 @@
 
       <div class="carousel-inner">
          {% for img_file in images %}
-            <div class="carousel-item vendor-img" data-img-id="{{ img_file.id }}">
-               <img src="{{ img_file.image.url }}" class="d-block w-100" alt="...">
+            <div class="carousel-item">
+               <div class="d-flex align-items-end overflow-hidden" style="height: 400px;">
+                  <img src="{{ img_file.image.url }}" class="d-block w-100" alt="...">
+               </div>
                <div class="carousel-caption d-none d-md-block">
-                  <h5 class="caption">{{ img_file.caption }}</h5>
-                  <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#updatePicture"
-                     onclick="fillImageSavedValues(this.parentElement.parentElement)">
-                     <i class="fas fa-pencil-alt"></i>
-                     <span class="ms-1">Change</span>
-                  </button>
-                  <a class="btn btn-danger btn-sm" href="{% url 'delete-picture' img_file.id %}" class="ms-4">
-                     <i class="fas fa-trash-alt"></i>
-                     <span class="ms-1">Delete</span>
-                  </a>
+                  <h5>{{ img_file.caption }}</h5>
                </div>
             </div>
          {% endfor %}
@@ -211,13 +215,6 @@
    </div>
 </div>
 
-<style>
-   .carousel-item {
-      height: 360px;
-      background: #777;
-   }
-</style>
-
 <script>
    window.onload = () => {
       fixCarousel();
@@ -228,9 +225,7 @@
       let carouselIndicators = document.querySelectorAll('.carousel-indicators button');
       carouselIndicators[0].classList.add('active');
       carouselIndicators[0].setAttribute('aria-current', true);
-      document.querySelector('.carousel-item').classList.add('active'); // first carousel-item
-
-      console.log(carouselIndicators);
+      document.querySelector('.carousel-item').classList.add('active'); // first 'carousel-item'
 
       for (let x = 0; x < carouselIndicators.length; x++) {
          let ariaLabel = 'Slide ' + (1 + x);
@@ -241,7 +236,7 @@
 
    async function fillImageSavedValues(imgCard) {
       let imgId = imgCard.getAttribute('data-img-id');
-      let imgCaption = imgCard.querySelector('.caption').innerHTML;
+      let imgCaption = imgCard.querySelector('figcaption').innerHTML;
       let actionUrl = `${LOCALHOST}/U/business-profile/update-picture/${imgId}/`;
 
       let updateForm = document.getElementById('updatePictureForm');
@@ -254,7 +249,7 @@
       let vendorImgs = document.querySelectorAll('.vendor-img');
 
       // Max number of pics per vendor is 5
-      if (vendorImgs.length > 8) {
+      if (vendorImgs.length > 4) {
          addImgBtn.classList.add('d-none');
       } else {
          addImgBtn.classList.remove('d-none');

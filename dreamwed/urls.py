@@ -43,7 +43,9 @@ urlpatterns += [
    path('U/budget-manager/create-budget-item', wedplanner.create_budget_item),
    path('U/budget-manager/<int:budget_item_id>/update', wedplanner.update_budget_item),
    path('U/budget-manager/<int:budget_item_id>/delete', wedplanner.delete_budget_item),
-   path('U/budget-manager/expenses-in-category/<int:category_id>', wedplanner.get_budget_items_in_category),   
+   path('U/budget-manager/expenses-in-category/<int:category_id>', wedplanner.get_budget_items_in_category), 
+
+   path('U/wedplanner-profile-update/>', wedplanner.update_wedplanner_profile, name='wedplanner-profile-update'),   
 ]
 
 

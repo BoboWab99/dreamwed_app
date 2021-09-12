@@ -104,6 +104,14 @@ class VendorImageUploadForm(ModelForm):
       fields = ['image', 'caption']
 
 
+class WeddingPlannerProfileUpdateForm(ModelForm):
+   class Meta:
+      model = WeddingPlanner
+      fields = ['partner_first_name', 'partner_last_name', 'wedding_date']
+      widgets = {
+         'wedding_date': DateInput(attrs={'type': 'date'}),
+      }
+
 
 class TodoForm(ModelForm):
    """Create new Todo form"""

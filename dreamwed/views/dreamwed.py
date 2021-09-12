@@ -4,11 +4,12 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from django.db.models import F
 
 from main.decorators import unauthenticated_user
 from main.settings import LOGIN_URL, HOME
 from dreamwed.forms import UserAccountInfoUpdateForm, VendorImageUploadForm
-from dreamwed.models import VendorImageUpload
+from dreamwed.models import VendorImageUpload, Todo, BudgetItem, Guest
 
 
 def home(request):
@@ -30,13 +31,47 @@ def user_profile(request):
       images = VendorImageUpload.objects.filter(vendor_id=curr_user.id)
       context = {
          'img_form': img_form,
-         # 'img_form_filled': VendorImageUploadForm(list(images.values())[3]),
          'images': images,
       }
       return render(request, 'vendor/profile.html', context)
 
    elif curr_user.is_wedding_planner:
-      return render(request, 'wedplanner/profile.html')
+      all_todos = Todo.objects.filter(wedplanner_id=curr_user.id).count()
+      completed_todos = Todo.objects.filter(wedplanner_id=curr_user.id, completed=True).count()
+      in_progress_todos = Todo.objects.filter(wedplanner_id=curr_user.id, completed=False).count()
+
+      budget_items = BudgetItem.objects.filter(wedplanner_id=curr_user.id).count()
+      budget_items_fully_paid = BudgetItem.objects.filter(wedplanner_id=curr_user.id, cost=F('paid')).count()
+      budget_items_partially_paid = BudgetItem.objects.filter(
+         wedplanner_id=curr_user.id, 
+         cost__gt=F('paid'), 
+         paid__gt=0).count()
+      
+      budget_items_not_paid = BudgetItem.objects.filter(wedplanner_id=curr_user.id, paid=0).count()
+      budget_items_not_paid += BudgetItem.objects.filter(wedplanner_id=curr_user.id, paid=None).count()
+      # don't know why "paid__in=[0, None]" does NOT work
+
+      all_guests = Guest.objects.filter(wedplanner_id=curr_user.id).count()
+      guests_pending = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='P').count()
+      guests_attending = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='A').count()
+      guests_declined = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='D').count()
+
+      context = {
+         'all_todos': all_todos,
+         'completed_todos': completed_todos,
+         'in_progress_todos': in_progress_todos,
+
+         'budget_items': budget_items,
+         'budget_items_fully_paid': budget_items_fully_paid,
+         'budget_items_partially_paid': budget_items_partially_paid,
+         'budget_items_not_paid': budget_items_not_paid,
+
+         'all_guests': all_guests,
+         'guests_pending': guests_pending,
+         'guests_attending': guests_attending,
+         'guests_declined': guests_declined,
+      }
+      return render(request, 'wedplanner/profile.html', context)
 
 
 @login_required

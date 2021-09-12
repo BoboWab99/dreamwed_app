@@ -76,10 +76,15 @@ class VendorImageUpload(models.Model):
    image = models.ImageField(upload_to='vendor_img_uploads')
    caption = models.CharField(max_length=500)
 
+   def __str__(self):
+      return f"{self.vendor.user}'s image"
+
 
 class WeddingPlanner(models.Model):
    """Model representing a user who's planning a wedding"""
    user = models.OneToOneField(User, on_delete=CASCADE, primary_key=True)
+   partner_first_name = models.CharField(max_length=50, blank=True, null=True)
+   partner_last_name = models.CharField(max_length=50, blank=True, null=True)
    wedding_date = models.DateField(blank=True, null=True)
 
    def __str__(self):

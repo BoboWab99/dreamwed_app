@@ -10,7 +10,7 @@ from django.views.decorators.http import require_http_methods
 from django.db import connection
 
 from main.decorators import wedding_planner_required, unauthenticated_user
-from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, VENDOR_CATEGORY_CHOICES
+from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, VENDOR_CATEGORY_CHOICES
 from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Bookmark, ExpenseCategory
 
 
@@ -110,6 +110,22 @@ class WeddingPlannerRegView(CreateView):
       user = form.save()
       login(self.request, user)
       return redirect('vendors')
+
+
+@login_required
+@wedding_planner_required
+def update_wedplanner_profile(request):
+   if not request.method == 'POST':
+      form = WeddingPlannerProfileUpdateForm(instance=request.user.weddingplanner) 
+      return render(request, 'wedplanner/update-profile-info.html', {'form': form})
+
+   form = WeddingPlannerProfileUpdateForm(request.POST, instance=request.user.weddingplanner) 
+   if not form.is_valid():
+      # display error msg
+      return redirect(request.META.get('HTTP_REFERER'))
+
+   form.save()
+   return redirect('user-profile')
 
 
 #  GUESTLIST 
@@ -262,7 +278,7 @@ def mark_task_as_complete(request, task_id):
 @login_required
 @wedding_planner_required
 def budget_manager(request):
-   expenses = BudgetItem.objects.filter(wedplanner_id=request.user)
+   expenses = BudgetItem.objects.filter(wedplanner_id=request.user.id)
    form = BudgetItemForm()
 
    if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):

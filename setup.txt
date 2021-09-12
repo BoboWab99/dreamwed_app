@@ -29,7 +29,7 @@ SOME SYSTEM USERS
 Admin: Admin
 Email: dreamwed.admin@exam.com
 
-Vendors: kenpics, zoephotos, wedcakes
-WedPlanners: Jeff, Kevin, Maria
+Vendors: kenpics, wedcakes
+WedPlanners: JeffK, Bobo
 
 Password: drwdUserPa$$

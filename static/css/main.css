@@ -120,10 +120,6 @@ section {padding: 2rem 0;}
    height: var(--pic-size);;
 }
 
-.profile-pic img {
-   min-height: 100%;
-}
-
 /* TOOLS NAV */
 #tools-nav {border-bottom: 1px solid #ccc;}
 #tools-nav .tool + .tool {

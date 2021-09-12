@@ -6,11 +6,13 @@
 {% include 'include/header.html' %}
 
 <div class="container">
-   <div class="row py-5">
-      <div class="col-3 shadow p-4 text-center">
+   <div class="row align-items-start py-5">
+      <div class="col-3 shadow px-2 pt-4 pb-5 text-center">
          <div class="d-flex justify-content-center">
-            <div class="profile-pic rounded-circle shadow-sm border border-1 p-1">
-               <img src="{{ user.profile.url }}" class="rounded-circle" alt="">
+            <div class="d-flex align-items-center justify-content-center profile-pic rounded-circle shadow-sm border p-1">
+               <div class="d-flex align-items-center overflow-hidden rounded-circle w-100 h-100">
+                  <img src="{{ user.profile.url }}" class="d-block w-100" alt="">
+               </div>
             </div>
          </div>
          <h2 class="mt-3">Welcome, {{ user.username }}! </h2>
@@ -44,7 +46,7 @@
          </div>
       </div>
 
-      <div class="col shadow p-4 ms-5">
+      <div class="col shadow px-4 pt-4 pb-5 ms-5">
          {% block extra-profile-info %}{% endblock extra-profile-info %}
       </div>
    </div>

@@ -22,7 +22,6 @@ class VendorRegView(CreateView):
       return redirect('user-profile')
 
 
-
 @login_required 
 @wedding_vendor_required
 def update_business_profile(request):
