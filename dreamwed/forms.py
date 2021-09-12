@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from django.forms.widgets import DateInput
 
-from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Review, VendorCategory
+from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Review, VendorCategory, VendorImageUpload
 
 
 # WEDDING VENDOR TYPES 
@@ -83,6 +83,25 @@ class WeddingPlannerRegForm(UserCreationForm):
       wedding_planner.save()
       print(f'\nNew vendor, {wedding_planner.user}, saved successfully!\n')
       return user
+
+
+
+class UserAccountInfoUpdateForm(ModelForm):
+   class Meta:
+      model = User
+      fields = ['username', 'first_name', 'last_name', 'email', 'profile']
+
+
+class BusinessProfileUpdateForm(ModelForm):
+   class Meta:
+      model = Vendor
+      fields = ['business_name', 'category', 'description', 'services_offered', 'city', 'location']
+
+
+class VendorImageUploadForm(ModelForm):
+   class Meta:
+      model = VendorImageUpload
+      fields = ['image', 'caption']
 
 
 

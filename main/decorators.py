@@ -13,7 +13,7 @@ def unauthenticated_user(view_func):
    return wrapper_func
 
 
-def vendor_required(view_func):
+def wedding_vendor_required(view_func):
    def wrapper_func(request, *args, **kwargs):
       if request.user.is_vendor:
          return view_func(request, *args, **kwargs)

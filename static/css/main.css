@@ -113,6 +113,17 @@ section {padding: 2rem 0;}
    background-size:cover;
 }
 
+.profile-pic {
+   --pic-size: 150px;
+
+   width: var(--pic-size);
+   height: var(--pic-size);;
+}
+
+.profile-pic img {
+   min-height: 100%;
+}
+
 /* TOOLS NAV */
 #tools-nav {border-bottom: 1px solid #ccc;}
 #tools-nav .tool + .tool {

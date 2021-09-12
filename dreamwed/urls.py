@@ -1,4 +1,7 @@
 from django.urls import path
+from django.conf.urls.static import static
+from django.conf import settings
+
 from dreamwed.views import dreamwed, wedplanner, vendor
 from main.settings import LOGIN_URL, LOGOUT_URL
 
@@ -12,6 +15,7 @@ urlpatterns = [
    path('U/login/', dreamwed.user_login, name=LOGIN_URL),
    path('U/logout/', dreamwed.user_logout, name=LOGOUT_URL),
    path('U/profile/', dreamwed.user_profile, name='user-profile'),
+   path('U/account-info-update/', dreamwed.update_user_account_info, name='user-account-info-update'),
 
    path('csrf-token/', dreamwed.get_csrf),
 ]
@@ -21,6 +25,7 @@ urlpatterns = [
 urlpatterns += [
    path('vendors/', wedplanner.vendors, name='vendors'),
    path('vendors/<int:vendor_id>/details', wedplanner.vendor_details, name='vendor-details'),
+   path('U/bookmarks/', wedplanner.bookmarks, name='bookmarks'),
    path('vendors/<int:vendor_id>/bookmark', wedplanner.bookmark_vendor, name='bookmark-vendor'),
    path('vendors/<int:vendor_id>/remove-bookmark', wedplanner.delete_bookmarked_vendor, name='remove-bookmark'),
 
@@ -38,13 +43,19 @@ urlpatterns += [
    path('U/budget-manager/create-budget-item', wedplanner.create_budget_item),
    path('U/budget-manager/<int:budget_item_id>/update', wedplanner.update_budget_item),
    path('U/budget-manager/<int:budget_item_id>/delete', wedplanner.delete_budget_item),
-   path('U/budget-manager/expenses-in-category/<int:category_id>', wedplanner.get_budget_items_in_category),
-
-   path('U/bookmarks/', wedplanner.bookmarks, name='bookmarks'),
+   path('U/budget-manager/expenses-in-category/<int:category_id>', wedplanner.get_budget_items_in_category),   
 ]
 
 
 # VENDORS
 urlpatterns += [
-
+   path('U/business-profile-update/', vendor.update_business_profile, name='update-business-profile'),
+   path('U/business-profile/upload-picture', vendor.upload_picture, name='upload-new-picture'),
+   path('U/business-profile/update-picture/<int:img_id>/', vendor.update_picture, name='update-picture'),
+   path('U/business-profile/delete-picture/<int:img_id>/', vendor.delete_picture, name='delete-picture'),
 ]
+
+
+# HANDLE MEDIA FILES
+if settings.DEBUG:
+   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

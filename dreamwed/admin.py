@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, WeddingPlanner, Vendor, Todo, Bookmark, Guest, BudgetItem, Review, VendorCategory, ExpenseCategory
+from .models import User, WeddingPlanner, Vendor, Todo, Bookmark, Guest, BudgetItem, Review, VendorCategory, ExpenseCategory, VendorImageUpload
 
 
 admin.site.register(User)
@@ -12,6 +12,7 @@ admin.site.register(Guest)
 admin.site.register(BudgetItem)
 admin.site.register(Review)
 admin.site.register(ExpenseCategory)
+admin.site.register(VendorImageUpload)
 
 # @admin.register(User)
 # class UserAdmin(admin.ModelAdmin):

@@ -1,14 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'include/user-profile-base.html' %}
 
-{% block title %} User profile {% endblock %}
+{% block extra-profile-info %}
+{{ user.username }}'s profile!
 
-{% block body %}
-{% include 'include/header.html' %}
+<hr>
 
-<div class="container center">
-   <br><br><br>
-   <h2>Welcome, {{ user.username }}! </h2>
-   <p>This is your profile page!</p>
-</div>
-
-{% endblock %}
+Some reports about planning tools and vendors HERE!
+{% endblock extra-profile-info %}

@@ -7,6 +7,8 @@ from django.middleware.csrf import get_token
 
 from main.decorators import unauthenticated_user
 from main.settings import LOGIN_URL, HOME
+from dreamwed.forms import UserAccountInfoUpdateForm, VendorImageUploadForm
+from dreamwed.models import VendorImageUpload
 
 
 def home(request):
@@ -24,10 +26,32 @@ def user_profile(request):
    curr_user = request.user
 
    if curr_user.is_vendor:
-      return render(request, 'vendor/profile.html')
+      img_form = VendorImageUploadForm()
+      images = VendorImageUpload.objects.filter(vendor_id=curr_user.id)
+      context = {
+         'img_form': img_form,
+         # 'img_form_filled': VendorImageUploadForm(list(images.values())[3]),
+         'images': images,
+      }
+      return render(request, 'vendor/profile.html', context)
 
    elif curr_user.is_wedding_planner:
       return render(request, 'wedplanner/profile.html')
+
+
+@login_required
+def update_user_account_info(request):
+   if not request.method == 'POST':
+      form = UserAccountInfoUpdateForm(instance=request.user) 
+      return render(request, 'dreamwed/update-account-info.html', {'form': form})
+
+   form = UserAccountInfoUpdateForm(request.POST, request.FILES, instance=request.user)
+   if not form.is_valid():
+      # display error msg
+      return redirect(request.META.get('HTTP_REFERER'))
+
+   form.save()
+   return redirect('user-profile')
 
 
 @unauthenticated_user
@@ -38,7 +62,8 @@ def register(request):
 @unauthenticated_user
 def user_login(request):
    if not request.method == 'POST':
-      return render(request, 'dreamwed/login.html', context={'form': AuthenticationForm()})
+      login_form = AuthenticationForm()
+      return render(request, 'dreamwed/login.html', context={'form': login_form})
 
    form = AuthenticationForm(data=request.POST)
    if not form.is_valid():

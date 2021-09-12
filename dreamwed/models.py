@@ -2,8 +2,10 @@ from django.db import models
 from django.db.models.deletion import CASCADE, SET_NULL
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
+
 from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
+from PIL import Image
 
 
 class VendorCategory(models.Model):
@@ -19,6 +21,7 @@ class User(AbstractUser):
    """Model representing a general system user"""
    is_vendor = models.BooleanField(default=False)
    is_wedding_planner = models.BooleanField(default=False)
+   profile = models.ImageField(default='default.jpg', upload_to='profile_pics')
 
    class Meta:
       ordering = ['last_name', 'first_name']
@@ -29,6 +32,17 @@ class User(AbstractUser):
 
    def __str__(self):
       return f'{self.first_name} {self.last_name}'
+
+   def save(self, *args, **kwargs):
+      super().save(*args, **kwargs)
+
+      # resize big images using 'Pillow' 
+      # 'django-cleanup' deletes old version of the image once it is changed!
+      img = Image.open(self.profile.path)
+      if img.height > 300 or img.width > 300:
+         img_size = (300, 300)
+         img.thumbnail(img_size)
+         img.save(self.profile.path)
 
 
 class Vendor(models.Model):
@@ -53,6 +67,14 @@ class Vendor(models.Model):
 
    def __str__(self):
       return f'{self.user}: {self.business_name}'
+
+
+
+class VendorImageUpload(models.Model):
+   """Model representing a wedding vendor's image upload"""
+   vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+   image = models.ImageField(upload_to='vendor_img_uploads')
+   caption = models.CharField(max_length=500)
 
 
 class WeddingPlanner(models.Model):
