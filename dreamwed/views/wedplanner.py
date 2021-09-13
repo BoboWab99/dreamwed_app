@@ -10,8 +10,8 @@ from django.views.decorators.http import require_http_methods
 from django.db import connection
 
 from main.decorators import wedding_planner_required, unauthenticated_user
-from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, VENDOR_CATEGORY_CHOICES
-from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Bookmark, ExpenseCategory
+from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm
+from dreamwed.models import User, Vendor, VendorCategory, Review, Guest, Todo, BudgetItem, Bookmark, ExpenseCategory, VendorImageUpload
 
 
 def dictfetchall(cursor):
@@ -34,6 +34,11 @@ def execute_raw_fetch(raw_query):
 # -------------------------
 def vendors(request):
    vendors = Vendor.objects.all()
+   vendor_categories = VendorCategory.objects.all()
+
+   print()
+   print(vendor_categories.values())
+   print()
 
    if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
       if not request.user.is_authenticated:
@@ -50,15 +55,25 @@ def vendors(request):
       return JsonResponse(response, safe=False, status=200) 
 
    context = {
-      'vendor_categories': VENDOR_CATEGORY_CHOICES,
+      'vendor_categories': vendor_categories,
       'vendors': vendors,
    }
    return render(request, 'wedplanner/vendors.html', context)
 
 
 def vendor_details(request, vendor_id):
+   review_form = ReviewForm()
    vendor = Vendor.objects.get(user_id=vendor_id)
-   return render(request, 'wedplanner/vendor-details.html', {'vendor': vendor})
+   vendor_reviews = Review.objects.filter(vendor_id=vendor_id)
+   images = VendorImageUpload.objects.filter(vendor_id=vendor_id)
+
+   context = {
+      'review_form': review_form,
+      'vendor': vendor,
+      'vendor_images': images,
+      'vendor_reviews': vendor_reviews,
+   }
+   return render(request, 'wedplanner/vendor-details.html', context)
 
 
 #  BOOKMARKS 
@@ -350,3 +365,47 @@ def delete_budget_item(request, budget_item_id):
    budget_item_to_delete = BudgetItem.objects.get(id=budget_item_id, wedplanner_id=request.user.id)
    budget_item_to_delete.delete()
    return JsonResponse({'msg': 'Task deleted!'}, status=200)
+
+
+#  RATE VENDOR
+# -------------------------
+@login_required
+@wedding_planner_required
+@require_http_methods('POST')
+def save_review(request, vendor_id):
+   form = ReviewForm(request.POST)
+
+   if not form.is_valid():
+      # report error
+      return redirect(request.META.get('HTTP_REFERER'))
+
+   rating = form.cleaned_data['stars']
+   review = form.cleaned_data['comment']
+
+   new_review = Review(
+      wedplanner_id=request.user.id,
+      vendor_id=vendor_id,
+      comment=review, 
+      stars=rating, 
+      )
+   new_review.save()
+   return redirect(request.META.get('HTTP_REFERER'))
+
+
+
+@login_required
+@wedding_planner_required
+@require_http_methods('POST')
+def update_review(request, review_id):
+   form = ReviewForm(request.POST)
+
+   if not form.is_valid():
+      # report error
+      return redirect(request.META.get('HTTP_REFERER'))
+
+   review_to_update = Review.objects.get(id=review_id)
+   review_to_update.comment = form.cleaned_data['comment']
+   review_to_update.stars = form.cleaned_data['stars']
+
+   review_to_update.save()
+   return redirect(request.META.get('HTTP_REFERER'))

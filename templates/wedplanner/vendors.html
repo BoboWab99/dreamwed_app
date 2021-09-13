@@ -14,7 +14,7 @@
             <label for="service" class="form-label">Category:</label>
             <select name="service" id="service" class="form-control">
                {% for vendor_type in vendor_categories %}
-                  <option value="{{ vendor_type.0 }}">{{ vendor_type.1 }}</option>
+                  <option value="{{ vendor_type.id }}">{{ vendor_type.name }}</option>
                {% endfor %}
             </select>
          </div>
@@ -38,16 +38,8 @@
       </p>
 
       <div class="row row-cols-1 row-cols-md-4 g-4 py-3" id="vendors-grid"></div>
-
-      <!-- <div class="center">
-         <br><br><br>
-         <h4>No vendors available on this system</h4>
-         <p>Are you a wedding vendor? Click below to create your vendor profile.</p>
-         <a href="#" class="btn btn-primary">Create vendor profile</a>
-      </div> -->
    </div>      
 </section>
-
 {% endblock body %}
 
 {% block scripts %}
@@ -65,6 +57,7 @@
 
       let handleResponse = async function (response) {
          let vendors = await response.json();
+         console.log(vendors);
          renderVendors(vendors);
          activateBookmarkStatus();
       }

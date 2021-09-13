@@ -5,6 +5,7 @@ html, body {
 body {
    margin: 0;
    padding: 0 0 4rem;
+   position: relative;
 }
 
 input[type='checkbox'] {
@@ -21,7 +22,6 @@ label {margin-bottom: 2px;}
 input:disabled {display: none;}
 
 .pointer {cursor: pointer;}
-section {padding: 2rem 0;}
 .center {text-align: center;}
 .big-gap {gap: 25%;}
 .sm-gap {gap: 0.5rem;}
@@ -60,17 +60,22 @@ section {padding: 2rem 0;}
    opacity: 0.7;
 }
 
-.initials {
-   --circle-size: 50px;
-   
-   flex: 0 0 var(--circle-size);
-   height: var(--circle-size);
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   border-radius: 50%;
-   border: 1px solid #ccc;
-   background: #eee;
+.circle-profile {
+   --size: 150px;
+   width: var(--size);
+   height: var(--size);
+}
+
+.circle-50 {
+   --size: 50px;   
+   width: var(--size);
+   height: var(--size);
+}
+
+.circle-45 {
+   --size: 45px;
+   width: var(--size);
+   height: var(--size);
 }
 
 .form-group {
@@ -82,16 +87,10 @@ section {padding: 2rem 0;}
 }
 
 .vendors-page .bookmark {
-   --size: 45px;
-
    position: absolute;
    top: 0.5rem;
    right: 0.5rem;
-   font-size: 20px;
    color: #fff;
-   width: var(--size);
-   height: var(--size);
-   border-radius: 50%;
    box-shadow: -2px 5px 10px rgba(255, 255, 255, 0.4);
 }
 

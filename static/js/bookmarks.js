@@ -11,7 +11,7 @@ async function renderVendors(vendors) {
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2ZstL_2V9eO2cQi61ic9Bc1DsR5y2956eZw&usqp=CAU" class="card-img-top" alt="...">
             <div class="card-body">
 
-               <label class="pointer bookmark d-flex align-items-center justify-content-center">
+               <label class="bookmark pointer circle-45 rounded-circle d-flex align-items-center justify-content-center fs-4">
                   <input type="checkbox" value="${vendor.wedplanner_id}" data-vendor-id="${vendor.user_id}" class="bookmark-vendor d-none" onchange="changeBookmarkStatus(this)">
                   <i class="fas fa-heart"></i>
                </label>

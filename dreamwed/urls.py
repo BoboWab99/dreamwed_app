@@ -45,7 +45,9 @@ urlpatterns += [
    path('U/budget-manager/<int:budget_item_id>/delete', wedplanner.delete_budget_item),
    path('U/budget-manager/expenses-in-category/<int:category_id>', wedplanner.get_budget_items_in_category), 
 
-   path('U/wedplanner-profile-update/>', wedplanner.update_wedplanner_profile, name='wedplanner-profile-update'),   
+   path('U/wedplanner-profile-update/', wedplanner.update_wedplanner_profile, name='wedplanner-profile-update'),   
+   path('U/rate-vendor/<int:vendor_id>/', wedplanner.save_review, name='rate-vendor'),   
+   path('U/edit-vendor-review/<int:vendor_id>/', wedplanner.update_review, name='edit-vendor-review'),   
 ]
 
 

@@ -2,8 +2,8 @@ from django.db import models
 from django.db.models.deletion import CASCADE, SET_NULL
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
+from django.core.validators import MaxValueValidator, MinValueValidator
 
-from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 from PIL import Image
 
@@ -195,12 +195,19 @@ class Review(models.Model):
    """Model representing a wedding planner rating of a vendor's service"""
    wedplanner = models.ForeignKey(WeddingPlanner, on_delete=models.CASCADE)
    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
-   stars = models.SmallIntegerField()
+   stars = models.SmallIntegerField(
+      default=5,
+      validators=[
+         MaxValueValidator(5),
+         MinValueValidator(1)
+      ]
+   )
    comment = models.TextField(max_length=5000)
-   date_posted = models.DateTimeField(default=datetime.now)
+   created     = models.DateTimeField(auto_now_add=True)
+   modified    = models.DateTimeField(auto_now=True)
 
    class Meta:
-      ordering = ['date_posted']
+      ordering = ['modified', 'created']
 
    def __str__(self):
       return f'{self.wedplanner} to {self.vendor}: {self.comment}'

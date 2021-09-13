@@ -2,20 +2,13 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from django.forms.widgets import DateInput
 
 from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Review, VendorCategory, VendorImageUpload
 
 
-# WEDDING VENDOR TYPES 
-VENDOR_CATEGORY_CHOICES = []
-categories = VendorCategory.objects.all()
-
-for category in categories:
-   VENDOR_CATEGORY_CHOICES += [
-      (category.id, category.name),
-   ]
-
+def vendor_categories():
+   return VendorCategory.objects.all().values_list('id', 'name')
+    
 
 class VendorRegForm(UserCreationForm):
    """vendor registration form"""
@@ -24,7 +17,7 @@ class VendorRegForm(UserCreationForm):
    email = forms.EmailField(required=True)
 
    business_name = forms.CharField(required=True)
-   category = forms.ChoiceField(choices=VENDOR_CATEGORY_CHOICES)
+   category = forms.ChoiceField(choices=vendor_categories())
    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'cols': 30}))
    services_offered = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'cols': 30}))
    city = forms.CharField(required=True)
@@ -62,7 +55,7 @@ class WeddingPlannerRegForm(UserCreationForm):
    email = forms.EmailField(required=True)
    wedding_date = forms.DateField(
       required=False, 
-      widget=DateInput(attrs={'type': 'date'}),
+      widget=forms.DateInput(attrs={'type': 'date'}),
       )
 
    class Meta(UserCreationForm.Meta):
@@ -109,7 +102,7 @@ class WeddingPlannerProfileUpdateForm(ModelForm):
       model = WeddingPlanner
       fields = ['partner_first_name', 'partner_last_name', 'wedding_date']
       widgets = {
-         'wedding_date': DateInput(attrs={'type': 'date'}),
+         'wedding_date': forms.DateInput(attrs={'type': 'date'}),
       }
 
 
@@ -119,7 +112,7 @@ class TodoForm(ModelForm):
       model = Todo
       fields = ['content', 'category', 'due_date']
       widgets = {
-         'due_date': DateInput(attrs={'type': 'date'}),
+         'due_date': forms.DateInput(attrs={'type': 'date'}),
       }
 
 
@@ -135,6 +128,9 @@ class ReviewForm(ModelForm):
    class Meta:
       model = Review
       fields = ['stars', 'comment']
+      widgets = {
+         'stars': forms.TextInput(attrs={'min': 1, 'max': 5,'type': 'number'}),
+      }
 
 
 class GuestForm(ModelForm):
