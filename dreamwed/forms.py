@@ -148,3 +148,13 @@ class GuestForm(ModelForm):
       widgets = {
          'note': forms.Textarea(attrs={'rows': 5, 'cols': 30})
       }
+
+
+class UpdateGuestForm(ModelForm):
+   """Add new guest form"""
+   class Meta:
+      model = Guest
+      fields = ['name', 'rsvp', 'note']
+      widgets = {
+         'note': forms.Textarea(attrs={'rows': 5, 'cols': 30})
+      }

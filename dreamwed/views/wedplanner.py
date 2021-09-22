@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
+from django.contrib import messages
 from django.views.generic import CreateView
 from django.http import JsonResponse
 from django.db.models import Avg
@@ -11,7 +12,7 @@ from django.views.decorators.http import require_http_methods
 from django.db import connection
 
 from main.decorators import wedding_planner_required, unauthenticated_user
-from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm, BudgetItemUpdateForm
+from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm, BudgetItemUpdateForm, UpdateGuestForm
 from dreamwed.models import User, Vendor, VendorCategory, Review, Guest, Todo, BudgetItem, Bookmark, ExpenseCategory, VendorImageUpload
 
 
@@ -177,6 +178,7 @@ class WeddingPlannerRegView(CreateView):
    def form_valid(self, form):
       user = form.save()
       login(self.request, user)
+      messages.success(self.request, 'Registration successful!') 
       return redirect('vendors')
 
 
@@ -219,10 +221,7 @@ def add_guest(request):
    form = GuestForm(guest_data)
 
    if not form.is_valid():
-      print()
-      print('form ain\'t valid!')
-      print(form.errors)
-      print()
+      messages.error(request, form.errors)
       return redirect(request.META.get('HTTP_REFERER'))
 
    guest_name = form.cleaned_data['name']
@@ -244,23 +243,18 @@ def add_guest(request):
 @login_required
 @wedding_planner_required
 def update_guest(request, guest_id):
-   guest_to_update = Guest.objects.get(id=guest_id)
+   guest_to_update = Guest.objects.get(id=guest_id, wedplanner_id=request.user.id)
 
    if not request.method == 'POST':
-      guest_form = GuestForm(instance=guest_to_update)
+      guest_form = UpdateGuestForm(instance=guest_to_update)
       return render(request, 'wedplanner/edit-guest.html', {'form': guest_form})
 
-   form = GuestForm(request.POST)
+   form = UpdateGuestForm(request.POST)
    if not form.is_valid():
-      print()
-      print('form ain\'t valid!')
-      print(form.errors)
-      print()
+      messages.error(request, form.errors)
       return redirect(request.META.get('HTTP_REFERER'))
 
    guest_to_update.name = form.cleaned_data['name'] 
-   guest_to_update.email = form.cleaned_data['email'] 
-   guest_to_update.phone_number = form.cleaned_data['phone_number']
    guest_to_update.rsvp = form.cleaned_data['rsvp']
    guest_to_update.note = form.cleaned_data['note']
 

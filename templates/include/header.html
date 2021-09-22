@@ -2,7 +2,7 @@
 <nav class="sticky-top py-3" id="navbar">
    <div class="container">
       <div class="logo d-flex justify-content-between">
-         <a class="navbar-brand display-4 fw-bold" href="{% url 'home' %}">DreamWed</a>
+         <a class="navbar-brand display-4 fw-bold fs-2" href="{% url 'home' %}" style="font-family: 'Dancing Script', cursive;">DreamWed</a>
          <button id="menu"><span class="bars"></span></button>
       </div>
 
@@ -36,7 +36,8 @@
             
             {% else %}
             <a href="{% url 'register' %}">Create account</a>
-            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'login' %}">User Login</a>
+            <a href="{% url 'admin:index' %}?next={% url 'home' %}">Admin Login</a>
             {% endif %}
          </div>
       </div>

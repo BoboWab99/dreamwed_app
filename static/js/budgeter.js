@@ -40,7 +40,6 @@ function renderGuests(budgetItems) {
          <tr class="budget-item">
             <td class="pointer" title="Click to update this budget item." data-bs-toggle="modal" data-bs-target="#updateExpense" onclick='fillBudgetItemSavedValues(\`${jsonBudgetItem}\`)'>
                <div class="expense-description">${budgetItem.description}</div>
-               <a href="#">ADD NOTE</a>
             </td>
             <td class="expense-cost">KES ${budgetItem.cost}</td>
             <td class="expense-paid">KES ${budgetItem.paid ? budgetItem.paid : 0}</td>

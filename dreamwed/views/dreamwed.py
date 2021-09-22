@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.db.models import F
@@ -52,9 +53,9 @@ def user_profile(request):
       # don't know why "paid__in=[0, None]" does NOT work
 
       all_guests = Guest.objects.filter(wedplanner_id=curr_user.id).count()
-      guests_pending = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='P').count()
-      guests_attending = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='A').count()
-      guests_declined = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='D').count()
+      guests_pending = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='Pending').count()
+      guests_attending = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='Attending').count()
+      guests_declined = Guest.objects.filter(wedplanner_id=curr_user.id, rsvp='Declined').count()
 
       context = {
          'all_todos': all_todos,
@@ -83,6 +84,7 @@ def update_user_account_info(request):
    form = UserAccountInfoUpdateForm(request.POST, request.FILES, instance=request.user)
    if not form.is_valid():
       # display error msg
+      messages.error(request, 'Please correct the errors below!')
       return redirect(request.META.get('HTTP_REFERER'))
 
    form.save()
@@ -102,14 +104,14 @@ def user_login(request):
 
    form = AuthenticationForm(data=request.POST)
    if not form.is_valid():
-      # throw error: Invalid username or password
+      messages.error(request, form.errors) 
       return redirect(LOGIN_URL)
 
    username = form.cleaned_data['username']
    password = form.cleaned_data['password']
    user = authenticate(username=username, password=password)
    if user is None:
-      # throw error: Invalid username or password
+      messages.error(request, 'Invalid username or password!')
       return redirect(LOGIN_URL)
 
    login(request, user)
@@ -119,6 +121,7 @@ def user_login(request):
 @login_required
 def user_logout(request):
    logout(request)
+   messages.success(request, 'Successfully logged out!')
    return redirect(HOME)
 
 

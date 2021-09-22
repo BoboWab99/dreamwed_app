@@ -42,8 +42,8 @@ function renderGuests(guests) {
             <td>
                <div class="name">${guest.name}</div>
                <div class="contact d-flex">
-                  <a href="tel:${guest.phone_number}" class="fs-4"><i class="fas fa-phone-alt"></i></a>
-                  <a href="mailto:${guest.email}" class="fs-4 ms-2"><i class="fas fa-envelope"></i></a>
+                  <a href="tel:${guest.phone_number}"><i class="fas fa-phone-alt fs-5"></i> Call</a>
+                  <a href="mailto:${guest.email}" class="ms-3"><i class="fas fa-envelope fs-5"></i> Email</a>
                </div>
             </td>
             <td>${guest.rsvp}</td>
@@ -68,19 +68,6 @@ function renderGuests(guests) {
          `;
       guestlistTableBody.innerHTML += tableRow;
    });
-}
-
-
-// fills update form with selected guest values
-async function fillGuestSavedValues(jsonGuest) {
-   let guest = JSON.parse(jsonGuest);
-   let updateForm = document.forms.addGuestForm;
-
-   updateForm.querySelector('#id_name').value = guest.name;
-   updateForm.querySelector('#id_email').value = guest.email;
-   updateForm.querySelector('#id_phone_number').value = guest.phone_number;
-   updateForm.querySelector('#id_rsvp').value = guest.rsvp;
-   // updateForm.setAttribute('data-budget-item-id', guest.id)
 }
 
 

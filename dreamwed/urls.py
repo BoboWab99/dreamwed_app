@@ -18,6 +18,8 @@ urlpatterns = [
    path('U/account-info-update/', dreamwed.update_user_account_info, name='user-account-info-update'),
 
    path('csrf-token/', dreamwed.get_csrf),
+
+   # (r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/successfully_logged_out/'})
 ]
 
 

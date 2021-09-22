@@ -125,9 +125,9 @@ class Bookmark(models.Model):
 
 class Guest(models.Model):
    """Model representing a wedding guest"""
-   PENDING = 'P'
-   ATTENDING = 'A'
-   DECLINED = 'D'
+   PENDING = 'Pending'
+   ATTENDING = 'Attending'
+   DECLINED = 'Declined'
 
    RSVP_STATUS_CHOICES = [
       (PENDING, 'Pending'),
@@ -141,7 +141,7 @@ class Guest(models.Model):
    note = models.CharField(max_length=1024)
    phone_number = PhoneNumberField(blank=True, null=True, unique=True)
    rsvp = models.CharField(
-      max_length=1, 
+      max_length=20,
       choices=RSVP_STATUS_CHOICES, 
       default=PENDING, 
       help_text='rsvp status',

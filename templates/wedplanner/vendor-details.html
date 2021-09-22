@@ -142,7 +142,7 @@
             {% if vendor_reviews %}
                {% for review in vendor_reviews %}
                   <div class="review d-flex align-items-start mb-3">
-                     <div class="circle-50 d-flex align-items-center justify-content-center rounded-circle border bg-light fs-4 me-2">{{review.wedplanner.user.last_name|make_list|first}}</div>
+                     <div class="circle-50 d-flex align-items-center justify-content-center rounded-circle border bg-light fs-4 me-2">{{ review.wedplanner.user.last_name|make_list|first }}</div>
                      <div class="msg">
                         <strong class="me-1">{{ review.wedplanner.user.first_name }} {{ review.wedplanner.user.last_name }}</strong>
                         <small class="text-muted">[Married on {{ review.wedplanner.wedding_date }}]</small>
