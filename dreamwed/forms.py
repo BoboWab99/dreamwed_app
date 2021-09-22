@@ -123,6 +123,13 @@ class BudgetItemForm(ModelForm):
       fields = ['description', 'expense_category', 'cost']
 
 
+class BudgetItemUpdateForm(ModelForm):
+   """Add new wedding expense form"""
+   class Meta:
+      model = BudgetItem
+      fields = ['description', 'expense_category', 'cost', 'paid']
+
+
 class ReviewForm(ModelForm):
    """Rate wedding vendor services form"""
    class Meta:
@@ -137,4 +144,7 @@ class GuestForm(ModelForm):
    """Add new guest form"""
    class Meta:
       model = Guest
-      fields = ['name', 'email', 'phone_number', 'rsvp']
+      fields = ['name', 'email', 'phone_number', 'rsvp', 'note']
+      widgets = {
+         'note': forms.Textarea(attrs={'rows': 5, 'cols': 30})
+      }

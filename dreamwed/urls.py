@@ -38,6 +38,9 @@ urlpatterns += [
    path('U/checklist/<int:task_id>/mark-complete', wedplanner.mark_task_as_complete, name='mark-task-as-complete'),
 
    path('U/guestlist/', wedplanner.guest_list, name='guestlist'),
+   path('U/guestlist/add-guest/', wedplanner.add_guest, name='add-guest'),
+   path('U/guestlist/<int:guest_id>/update/', wedplanner.update_guest, name='guest-update'),
+   path('U/guestlist/<int:guest_id>/delete/', wedplanner.delete_guest, name='guest-delete'),
 
    path('U/budget-manager/', wedplanner.budget_manager, name='budget-manager'),
    path('U/budget-manager/create-budget-item', wedplanner.create_budget_item),
@@ -47,7 +50,8 @@ urlpatterns += [
 
    path('U/wedplanner-profile-update/', wedplanner.update_wedplanner_profile, name='wedplanner-profile-update'),   
    path('U/rate-vendor/<int:vendor_id>/', wedplanner.save_review, name='rate-vendor'),   
-   path('U/edit-vendor-review/<int:vendor_id>/', wedplanner.update_review, name='edit-vendor-review'),   
+   path('U/edit-vendor-review/<int:review_id>/', wedplanner.update_review, name='edit-vendor-review'),   
+   path('U/delete-vendor-review/<int:review_id>/', wedplanner.delete_review, name='delete-vendor-review'),   
 ]
 
 

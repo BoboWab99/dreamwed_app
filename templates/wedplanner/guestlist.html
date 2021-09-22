@@ -7,8 +7,10 @@
 
 <!-- Modal -->
 <div class="modal fade" id="addGuest" tabindex="-1" role="dialog" aria-labelledby="addGuestTitle" aria-hidden="true">
-   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-      <form class="modal-content" action="" method="POST">
+   <div class="modal-dialog modal-dialog-scrollable" role="document">
+      <form onsubmit="addGuest(event)" name="addGuestForm" class="modal-content">
+         {% csrf_token %}
+
          <div class="modal-header">
             <h5 class="modal-title" id="addGuestTitle">Add new guest</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -31,7 +33,7 @@
 
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save guest</button>
+            <button type="submit" class="btn btn-primary">Save guest</button>
          </div>
       </form>
    </div>
@@ -41,7 +43,7 @@
 {% include 'include/header.html' %}
 {% include 'include/tools-nav.html' %}
 
-<section>
+<section class="my-4">
    <div class="container grid-200-auto">
       <div class="side-nav">
          <a href="#">All Events</a><br>
@@ -72,8 +74,7 @@
 
          <br><br>
 
-         {% if guests %}
-         <table class="table">
+         <table class="table" id="guestlistTable">
             <thead>
                <tr>
                   <th>Name</th>
@@ -83,37 +84,14 @@
                </tr>
             </thead>
 
-            <tbody class="table">
-            {% for guest in guests %}
-               <tr>
-                  <td>
-                     <div class="name">{{ guest.name }}</div>
-                     <div class="contact">
-                        <a href="tel:{{ guest.phone_number }}"><i class="fas fa-phone-alt"></i></a>
-                        <a href="mailto:{{ guest.email }}"><i class="fas fa-envelope"></i></a>
-                     </div>
-                  </td>
-                  <td>
-                     <select name="rsvp" id="rsvp">
-                        <option value="">Pending</option>
-                        <option value="">Attending</option>
-                        <option value="">Declined</option>
-                     </select>
-                  </td>
-                  <td>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quia reprehenderit modi harum tempore dolor quam, in molestias aspernatur assumenda velit!</td>
-                  <td><i class="fas fa-ellipsis-h"></i></td>
-               </tr>
-            {% endfor %}
-            </tbody>
+            <tbody class="table"></tbody>
          </table>
-         {% else %}
-            <div class="center">
-               <br><br><br>
-               <h4>No guests added yet!</h4>
-            </div>
-         {% endif %}
       </div>
    </div>
 </section>
-
 {% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script src="{% static 'js/guestlist.js' %}"></script>
+{% endblock scripts %}

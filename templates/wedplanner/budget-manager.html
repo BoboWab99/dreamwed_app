@@ -18,7 +18,7 @@
 
          <div class="modal-body">
             <div class="modal-body">
-               {% for field in form.visible_fields %}
+               {% for field in create_form.visible_fields %}
                <div class="form-group">
                   {{ field.label_tag }}
                   {% render_field field class+="form-control"%}
@@ -54,7 +54,7 @@
 
          <div class="modal-body">
             <div class="modal-body">
-               {% for field in form.visible_fields %}
+               {% for field in update_form.visible_fields %}
                <div class="form-group">
                   {{ field.label_tag }}
                   {% render_field field class+="form-control"%}
@@ -80,7 +80,7 @@
 {% include 'include/header.html' %}
 {% include 'include/tools-nav.html' %}
 
-<section>
+<section class="my-4">
    <div class="container grid-200-auto">
       <div class="side-nav">
          <a class="pointer" onclick="getAllbudgetItems()">All</a><br>
@@ -132,7 +132,6 @@
    </div>
 </section>
 {% endblock body %}
-
 
 {% block scripts %}
 {% load static %}

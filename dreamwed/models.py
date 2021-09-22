@@ -138,6 +138,7 @@ class Guest(models.Model):
    wedplanner = models.ForeignKey(WeddingPlanner, on_delete=models.CASCADE)
    name = models.CharField(max_length=50)
    email = models.EmailField(max_length=128)
+   note = models.CharField(max_length=1024)
    phone_number = PhoneNumberField(blank=True, null=True, unique=True)
    rsvp = models.CharField(
       max_length=1, 

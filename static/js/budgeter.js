@@ -4,16 +4,16 @@ const budgetItemsTableBody = document.querySelector('#BudgetItemsTable tbody');
 
 
 window.addEventListener('load', () => {
-   getAllbudgetItems();
+   getAllGuests();
 });
 
 
-async function getAllbudgetItems() {
+async function getAllGuests() {
    url = `${LOCALHOST}/U/budget-manager/`;
 
    let handleResponse = async function (response) {
       let budgetItems = await response.json();
-      renderBudgetItems(budgetItems);
+      renderGuests(budgetItems);
    }
    fetchRequest(handleResponse, url, 'GET');
 }
@@ -24,13 +24,13 @@ async function getExpensesInCategory(category_id) {
 
    let handleResponse = async function (response) {
       let budgetItems = await response.json();
-      renderBudgetItems(budgetItems);
+      renderGuests(budgetItems);
    }
    fetchRequest(handleResponse, url, 'GET');
 }
 
 
-function renderBudgetItems(budgetItems) {
+function renderGuests(budgetItems) {
    budgetItemsTableBody.innerHTML = '';
 
    budgetItems.forEach(budgetItem => {
@@ -64,6 +64,7 @@ async function fillBudgetItemSavedValues(jsonBudgetItem) {
    updateForm.querySelector('#id_description').value = budgetItem.description;
    updateForm.querySelector('#id_expense_category').value = validateOutput(budgetItem.expense_category_id);
    updateForm.querySelector('#id_cost').value = budgetItem.cost;
+   updateForm.querySelector('#id_paid').value = budgetItem.paid;
    updateForm.setAttribute('data-budget-item-id', budgetItem.id)
 }
 
@@ -94,18 +95,20 @@ async function createUpdateBudgetItemHelper(url, formData) {
    let budgetItemContent = formData.get('description');
    let budgetItemExpenseCategory = formData.get('expense_category');
    let budgetItemCost = formData.get('cost');
+   let budgetItemPaid = formData.get('paid');
 
    let budgetItem = {
       description: budgetItemContent,
       expense_category: budgetItemExpenseCategory,
       cost: budgetItemCost,
+      paid: budgetItemPaid,
    };
 
    let handleResponse = async function (response) {
       await response.json()
          .then(res => console.log(res.msg));
       // emptyFilter();
-      getAllbudgetItems();
+      getAllGuests();
    }
    fetchRequest(handleResponse, url, 'POST', JSON.stringify(budgetItem));
 }
@@ -118,7 +121,7 @@ async function deleteBudgetItem(budgetItemId) {
    let handleResponse = async function (response) {
       await response.json()
          .then(res => console.log(res.msg));
-      getAllbudgetItems();
+      getAllGuests();
    }
    fetchRequest(handleResponse, url, 'DELETE');
 }

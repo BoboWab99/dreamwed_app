@@ -148,7 +148,7 @@
 
 <div class="mt-5 mb-4 text-center">
    <h5 class="mb-0">{{ user.vendor.business_name }} Gallery</h5>
-   <p class="text-muted">You can add your business images up to 5 images.</p>
+   <p class="text-muted">You can add your business images up to 5 images. Your service will NOT appear in search results if you have less than 3 pictures!</p>
 </div>
 
 <div class="text-center">
@@ -171,7 +171,7 @@
                <i class="fas fa-pencil-alt"></i>
                <span class="ms-1">Change</span>
             </button>
-            <a href="{% url 'delete-picture' img_file.id %}" class="mx-2">
+            <a href="{% url 'delete-picture' img_file.id %}" class="btn btn-outline-secondary btn-sm ms-1">
                <i class="fas fa-trash-alt"></i> 
                <span class="ms-1">Delete</span>
             </a>

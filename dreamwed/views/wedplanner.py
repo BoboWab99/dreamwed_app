@@ -6,11 +6,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.views.generic import CreateView
 from django.http import JsonResponse
+from django.db.models import Avg
 from django.views.decorators.http import require_http_methods
 from django.db import connection
 
 from main.decorators import wedding_planner_required, unauthenticated_user
-from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm
+from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm, BudgetItemUpdateForm
 from dreamwed.models import User, Vendor, VendorCategory, Review, Guest, Todo, BudgetItem, Bookmark, ExpenseCategory, VendorImageUpload
 
 
@@ -30,35 +31,56 @@ def execute_raw_fetch(raw_query):
    return result
 
 
+def verified_vendors():
+   ''' Verified vendors have at least 3 business pictures '''
+   enough_pics = 3
+   verified_vendors_ids = []
+   all_vendors_ids = Vendor.objects.values_list('user_id')
+
+   for vendor_id in all_vendors_ids:
+      this_vendor_pics = VendorImageUpload.objects.filter(vendor_id=vendor_id).count()
+      if (this_vendor_pics > enough_pics):
+         verified_vendors_ids.append(vendor_id[0])
+
+   return tuple(verified_vendors_ids)
+
+
 #  VENDORS 
 # -------------------------
 def vendors(request):
-   vendors = Vendor.objects.all()
-   vendor_categories = VendorCategory.objects.all()
+   if(not request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
+      vendor_categories = VendorCategory.objects.all()
+      context = {'vendor_categories': vendor_categories}
+      return render(request, 'wedplanner/vendors.html', context)
 
-   print()
-   print(vendor_categories.values())
-   print()
+   verified = f'''
+   SELECT
+      dreamwed_user.profile,
+      dreamwed_vendor.user_id AS vendor_id,
+      dreamwed_vendor.business_name,
+      dreamwed_vendor.location,
+      dreamwed_vendor.city
+   FROM dreamwed_vendor
+   INNER JOIN dreamwed_user
+      ON dreamwed_vendor.user_id = dreamwed_user.id
+      AND dreamwed_vendor.user_id IN {verified_vendors()} '''
 
-   if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
-      if not request.user.is_authenticated:
-         response = list(vendors.values())
-         return JsonResponse(response, safe=False, status=200)
+   verified_vendors_data = execute_raw_fetch(verified)
 
-      raw_query = f'''SELECT * FROM dreamwed_vendor
-      LEFT JOIN (SELECT dreamwed_bookmark.wedplanner_id, 
-      dreamwed_bookmark.vendor_id AS bookmarked_vendor_id FROM dreamwed_bookmark
-      WHERE dreamwed_bookmark.wedplanner_id = {request.user.id}) AS bookmarks
-      ON dreamwed_vendor.user_id = bookmarks.bookmarked_vendor_id'''
+   for verified_vendor in verified_vendors_data:
+      vendor_id  = verified_vendor['vendor_id']
+      num_reviews = Review.objects.filter(vendor_id=vendor_id).count()
+      avrg_rating = Review.objects.filter(vendor_id=vendor_id).aggregate(Avg('stars'))
+      verified_vendor['num_reviews'] = num_reviews
+      verified_vendor['avrg_rating'] = avrg_rating['stars__avg']
+      verified_vendor['is_vendor_bookmarked'] = False
 
-      response = execute_raw_fetch(raw_query)
-      return JsonResponse(response, safe=False, status=200) 
+      if request.user.is_authenticated:
+         bookmark = Bookmark.objects.filter(wedplanner_id=request.user.id, vendor_id=vendor_id)
+         if bookmark:
+            verified_vendor['is_vendor_bookmarked'] = True
 
-   context = {
-      'vendor_categories': vendor_categories,
-      'vendors': vendors,
-   }
-   return render(request, 'wedplanner/vendors.html', context)
+   return JsonResponse(verified_vendors_data, safe=False, status=200) 
 
 
 def vendor_details(request, vendor_id):
@@ -81,20 +103,51 @@ def vendor_details(request, vendor_id):
 @login_required
 @wedding_planner_required
 def bookmarks(request):
-   bookmarks = Bookmark.objects.values_list('vendor_id', flat=True).filter(wedplanner_id=request.user.id)
-   saved_vendors = Vendor.objects.filter(user_id__in=bookmarks)
+   if(not request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
+      bookmarks = Bookmark.objects.values_list('vendor_id', flat=True).filter(wedplanner_id=request.user.id)
+      saved_vendors = Vendor.objects.filter(user_id__in=bookmarks)
+      return render(request, 'wedplanner/bookmarks.html', {'vendors': saved_vendors})
 
-   if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
-      raw_query = f'''SELECT * FROM dreamwed_vendor
-      INNER JOIN (SELECT dreamwed_bookmark.wedplanner_id, 
-      dreamwed_bookmark.vendor_id AS bookmarked_vendor_id FROM dreamwed_bookmark
-      WHERE dreamwed_bookmark.wedplanner_id = {request.user.id}) AS bookmarks
-      ON dreamwed_vendor.user_id = bookmarks.bookmarked_vendor_id'''
+   verified = f'''
+   SELECT
+      dreamwed_user.profile,
+      dreamwed_vendor.user_id AS vendor_id,
+      dreamwed_vendor.business_name,
+      dreamwed_vendor.location,
+      dreamwed_vendor.city
+   FROM dreamwed_vendor
+   INNER JOIN dreamwed_user
+      ON dreamwed_vendor.user_id = dreamwed_user.id
+      AND dreamwed_vendor.user_id IN {verified_vendors()} '''
 
-      response = execute_raw_fetch(raw_query)
-      return JsonResponse(response, safe=False, status=200)
+   bookmarked = f'''
+   SELECT 
+      dreamwed_bookmark.wedplanner_id  AS bookmark_wedplaner_id, 
+      dreamwed_bookmark.vendor_id AS bookmark_vendor_id 
+   FROM dreamwed_bookmark
+   WHERE dreamwed_bookmark.wedplanner_id = {request.user.id} '''
 
-   return render(request, 'wedplanner/bookmarks.html', {'vendors': saved_vendors})
+   raw_query = f''' SELECT * 
+   FROM ({verified}) AS verified
+   INNER JOIN ({bookmarked}) AS bookmarked
+   ON verified.vendor_id = bookmarked.bookmark_vendor_id '''
+
+   data = execute_raw_fetch(raw_query)
+
+   for verified_vendor in data:
+      vendor_id  = verified_vendor['vendor_id']
+      num_reviews = Review.objects.filter(vendor_id=vendor_id).count()
+      avrg_rating = Review.objects.filter(vendor_id=vendor_id).aggregate(Avg('stars'))
+      verified_vendor['num_reviews'] = num_reviews
+      verified_vendor['avrg_rating'] = avrg_rating['stars__avg']
+      verified_vendor['is_vendor_bookmarked'] = False
+
+      if request.user.is_authenticated:
+         bookmark = Bookmark.objects.filter(wedplanner_id=request.user.id, vendor_id=vendor_id)
+         if bookmark:
+            verified_vendor['is_vendor_bookmarked'] = True
+
+   return JsonResponse(data, safe=False, status=200)
 
 
 @login_required
@@ -148,13 +201,80 @@ def update_wedplanner_profile(request):
 @login_required
 @wedding_planner_required
 def guest_list(request):
-   guests = Guest.objects.filter(wedplanner_id=request.user.id)
+   if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
+      guests = Guest.objects.filter(wedplanner_id=request.user.id)
+      data = list(guests.values())
+      return JsonResponse(data, safe=False, status=200)
+
    form = GuestForm()
-   context = {
-      'todos': guests,
-      'form': form,
-   }
+   context = {'form': form}
    return render(request, 'wedplanner/guestlist.html', context)
+
+
+@login_required
+@wedding_planner_required
+@require_http_methods('POST')
+def add_guest(request):
+   guest_data = json.loads(request.body)
+   form = GuestForm(guest_data)
+
+   if not form.is_valid():
+      print()
+      print('form ain\'t valid!')
+      print(form.errors)
+      print()
+      return redirect(request.META.get('HTTP_REFERER'))
+
+   guest_name = form.cleaned_data['name']
+   guest_email = form.cleaned_data['email']
+   guest_phone_number = form.cleaned_data['phone_number']
+   guest_rsvp = form.cleaned_data['rsvp']
+
+   new_guest = Guest(
+      wedplanner_id=request.user.id,
+      phone_number=guest_phone_number,
+      name=guest_name,  
+      email=guest_email,  
+      rsvp=guest_rsvp,
+      )
+   new_guest.save()
+   return JsonResponse({'msg': 'New guest added!'}, status=200)
+
+
+@login_required
+@wedding_planner_required
+def update_guest(request, guest_id):
+   guest_to_update = Guest.objects.get(id=guest_id)
+
+   if not request.method == 'POST':
+      guest_form = GuestForm(instance=guest_to_update)
+      return render(request, 'wedplanner/edit-guest.html', {'form': guest_form})
+
+   form = GuestForm(request.POST)
+   if not form.is_valid():
+      print()
+      print('form ain\'t valid!')
+      print(form.errors)
+      print()
+      return redirect(request.META.get('HTTP_REFERER'))
+
+   guest_to_update.name = form.cleaned_data['name'] 
+   guest_to_update.email = form.cleaned_data['email'] 
+   guest_to_update.phone_number = form.cleaned_data['phone_number']
+   guest_to_update.rsvp = form.cleaned_data['rsvp']
+   guest_to_update.note = form.cleaned_data['note']
+
+   guest_to_update.save()
+   return redirect('guestlist')
+
+
+@login_required
+@wedding_planner_required
+def delete_guest(request, guest_id):
+   guest_to_delete = Guest.objects.get(id=guest_id)
+   guest_to_delete.delete()
+   return JsonResponse({'msg': 'Guest deleted!'}, status=200)
+
 
 
 #  CHECKLIST 
@@ -165,16 +285,18 @@ def check_list(request):
    all_todos = Todo.objects.filter(wedplanner_id=request.user.id)
 
    if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
-      raw_query = f'''SELECT 
-      dreamwed_todo.id AS todo_id,
-      dreamwed_todo.content,
-      dreamwed_todo.due_date,
-      dreamwed_todo.completed,
-      dreamwed_vendorCategory.id AS vendor_category_id,
-      dreamwed_vendorCategory.name AS vendor_category_name
+      raw_query = f''' 
+      SELECT 
+         dreamwed_todo.id AS todo_id,
+         dreamwed_todo.content,
+         dreamwed_todo.due_date,
+         dreamwed_todo.completed,
+         dreamwed_vendorCategory.id AS vendor_category_id,
+         dreamwed_vendorCategory.name AS vendor_category_name
       FROM dreamwed_todo
-      INNER JOIN dreamwed_vendorCategory ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
-      WHERE dreamwed_todo.wedplanner_id = {request.user.id}'''
+      INNER JOIN dreamwed_vendorCategory 
+         ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
+      WHERE dreamwed_todo.wedplanner_id = {request.user.id} '''
 
       response = execute_raw_fetch(raw_query)
       return JsonResponse(response, safe=False, status=200)
@@ -190,16 +312,19 @@ def check_list(request):
 @login_required
 @wedding_planner_required
 def tasks_in_progress(request):
-   raw_query = f'''SELECT 
-   dreamwed_todo.id AS todo_id,
-   dreamwed_todo.content,
-   dreamwed_todo.due_date,
-   dreamwed_todo.completed,
-   dreamwed_vendorCategory.id AS vendor_category_id,
-   dreamwed_vendorCategory.name AS vendor_category_name
+   raw_query = f''' 
+   SELECT 
+      dreamwed_todo.id AS todo_id,
+      dreamwed_todo.content,
+      dreamwed_todo.due_date,
+      dreamwed_todo.completed,
+      dreamwed_vendorCategory.id AS vendor_category_id,
+      dreamwed_vendorCategory.name AS vendor_category_name
    FROM dreamwed_todo
-   INNER JOIN dreamwed_vendorCategory ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
-   WHERE dreamwed_todo.wedplanner_id = {request.user.id} AND dreamwed_todo.completed = False'''
+   INNER JOIN dreamwed_vendorCategory 
+      ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
+   WHERE dreamwed_todo.wedplanner_id = {request.user.id} 
+      AND dreamwed_todo.completed = False '''
 
    response = execute_raw_fetch(raw_query)
    return JsonResponse(response, safe=False, status=200)
@@ -208,16 +333,19 @@ def tasks_in_progress(request):
 @login_required
 @wedding_planner_required
 def tasks_completed(request):
-   raw_query = f'''SELECT 
-   dreamwed_todo.id AS todo_id,
-   dreamwed_todo.content,
-   dreamwed_todo.due_date,
-   dreamwed_todo.completed,
-   dreamwed_vendorCategory.id AS vendor_category_id,
-   dreamwed_vendorCategory.name AS vendor_category_name
+   raw_query = f''' 
+   SELECT 
+      dreamwed_todo.id AS todo_id,
+      dreamwed_todo.content,
+      dreamwed_todo.due_date,
+      dreamwed_todo.completed,
+      dreamwed_vendorCategory.id AS vendor_category_id,
+      dreamwed_vendorCategory.name AS vendor_category_name
    FROM dreamwed_todo
-   INNER JOIN dreamwed_vendorCategory ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
-   WHERE dreamwed_todo.wedplanner_id = {request.user.id} AND dreamwed_todo.completed = True'''
+   INNER JOIN dreamwed_vendorCategory 
+      ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
+   WHERE dreamwed_todo.wedplanner_id = {request.user.id} 
+      AND dreamwed_todo.completed = True '''
 
    response = execute_raw_fetch(raw_query)
    return JsonResponse(response, safe=False, status=200)
@@ -293,17 +421,19 @@ def mark_task_as_complete(request, task_id):
 @login_required
 @wedding_planner_required
 def budget_manager(request):
-   expenses = BudgetItem.objects.filter(wedplanner_id=request.user.id)
-   form = BudgetItemForm()
+   expense_categories = ExpenseCategory.objects.all()
+   create_form = BudgetItemForm()
+   update_form = BudgetItemUpdateForm()
 
    if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
-      response = list(expenses.values())
-      return JsonResponse(response, safe=False, status=200)
+      expenses = BudgetItem.objects.filter(wedplanner_id=request.user.id)
+      data = list(expenses.values())
+      return JsonResponse(data, safe=False, status=200)
 
    context = {
-      'expenses': expenses,
-      'expense_categories': ExpenseCategory.objects.all(),
-      'form': form,
+      'create_form': create_form,
+      'update_form': update_form,
+      'expense_categories': expense_categories,
    }
    return render(request, 'wedplanner/budget-manager.html', context)
 
@@ -312,8 +442,8 @@ def budget_manager(request):
 @wedding_planner_required
 def get_budget_items_in_category(request, category_id):
    budget_items = BudgetItem.objects.filter(wedplanner_id=request.user.id, expense_category_id=category_id)
-   response = list(budget_items.values())
-   return JsonResponse(response, safe=False, status=200)
+   data = list(budget_items.values())
+   return JsonResponse(data, safe=False, status=200)
 
 
 @login_required
@@ -345,7 +475,7 @@ def create_budget_item(request):
 @require_http_methods('POST')
 def update_budget_item(request, budget_item_id):
    budget_item_data = json.loads(request.body)
-   form = BudgetItemForm(budget_item_data)
+   form = BudgetItemUpdateForm(budget_item_data)
 
    if not form.is_valid():
       return redirect(request.META.get('HTTP_REFERER'))
@@ -354,6 +484,7 @@ def update_budget_item(request, budget_item_id):
    budget_item_to_update.description = form.cleaned_data['description'] 
    budget_item_to_update.expense_category = form.cleaned_data['expense_category'] 
    budget_item_to_update.cost = form.cleaned_data['cost']
+   budget_item_to_update.paid = form.cleaned_data['paid']
 
    budget_item_to_update.save()
    return JsonResponse({'msg': 'Budget item updated!'}, status=200)
@@ -395,17 +526,27 @@ def save_review(request, vendor_id):
 
 @login_required
 @wedding_planner_required
-@require_http_methods('POST')
 def update_review(request, review_id):
-   form = ReviewForm(request.POST)
+   review_to_update = Review.objects.get(id=review_id)
 
-   if not form.is_valid():
+   if not request.method == 'POST':
+      review_form = ReviewForm(instance=review_to_update)
+      return render(request, 'wedplanner/update-review.html', {'form': review_form})
+
+   review_form = ReviewForm(request.POST)
+   if not review_form.is_valid():
       # report error
       return redirect(request.META.get('HTTP_REFERER'))
 
-   review_to_update = Review.objects.get(id=review_id)
-   review_to_update.comment = form.cleaned_data['comment']
-   review_to_update.stars = form.cleaned_data['stars']
-
+   review_to_update.comment = review_form.cleaned_data['comment']
+   review_to_update.stars = review_form.cleaned_data['stars']
    review_to_update.save()
+   return redirect('vendor-details', vendor_id=review_to_update.vendor_id)
+
+
+@login_required
+@wedding_planner_required
+def delete_review(request, review_id):
+   review_to_delete = Review.objects.get(id=review_id)
+   review_to_delete.delete()
    return redirect(request.META.get('HTTP_REFERER'))

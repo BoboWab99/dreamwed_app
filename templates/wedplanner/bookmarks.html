@@ -5,7 +5,7 @@
 {% block body %}
 {% include 'include/header.html' %}
 
-<section class="vendors-page">
+<section class="vendors-page py-5 mt-3">
    <div class="container">
       <h3>Saved vendors</h3>
 
@@ -36,6 +36,8 @@
 
       let handleResponse = async function (response) {
          let savedVendors = await response.json();
+         console.log('savedVendors');
+         console.log(savedVendors);
          renderVendors(savedVendors);
          activateBookmarkStatus();
       }

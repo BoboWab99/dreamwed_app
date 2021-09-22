@@ -32,10 +32,10 @@
 
 <section class="vendors-page">
    <div class="container">
-      <p class="m-0">
+      <!-- <p class="m-0">
          <i class="fas fa-search"></i>
          <span>Wedding venue near Westlands Nairobi</span>
-      </p>
+      </p> -->
 
       <div class="row row-cols-1 row-cols-md-4 g-4 py-3" id="vendors-grid"></div>
    </div>      
@@ -57,6 +57,7 @@
 
       let handleResponse = async function (response) {
          let vendors = await response.json();
+         console.log('vendors');
          console.log(vendors);
          renderVendors(vendors);
          activateBookmarkStatus();

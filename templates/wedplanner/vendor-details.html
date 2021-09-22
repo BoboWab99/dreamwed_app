@@ -152,14 +152,14 @@
 
                      {% if review.wedplanner.user_id == user.id %}
                         <div class="mt-1">
-                           <button class="btn btn-outline-primary btn-sm ms-4">
+                           <a href="{% url 'edit-vendor-review' review.id %}" class="btn btn-outline-primary btn-sm ms-4">
                               <i class="fas fa-pencil-alt"></i>
                               <span class="ms-1">Edit</span>
-                           </button>
-                           <button class="btn btn-outline-secondary btn-sm ms-1">
+                           </a>
+                           <a href="{% url 'delete-vendor-review' review.id %}" class="btn btn-outline-secondary btn-sm ms-1">
                               <i class="fas fa-trash-alt"></i>
                               <span class="ms-1">Delete</span>
-                           </button>
+                           </a>
                         </div>
                      {% endif %}
                   </div>
@@ -174,7 +174,7 @@
       </div>
    </div>
    </div>
-</main>   
+</main>
 
 <script>
    window.onload = () => {
@@ -206,13 +206,13 @@
       let rating = Number(ratingDiv.getAttribute('data-rating'));
 
       for (let x = 1; x <= rating; x++) {
-         let star = `<i class="fas fa-star" class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="${x}" style="color: var(--bs-pink)"></i>`;
+         let star = `<i class="fas fa-star" class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="${x}" style="color: var(--bs-pink);"></i>`;
          ratingDiv.innerHTML += star;
       }
 
       if (rating < 5) {
          for (let x = 1; x <= 5 - rating; x++) {
-            let extraStar = `<i class="far fa-star" class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="${x + rating}" style="color: var(--bs-pink)"></i>`;
+            let extraStar = `<i class="far fa-star" class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="${x + rating}" style="color: var(--bs-pink);"></i>`;
             ratingDiv.innerHTML += extraStar;
          }
       }
