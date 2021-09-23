@@ -83,7 +83,6 @@ def update_user_account_info(request):
 
    form = UserAccountInfoUpdateForm(request.POST, request.FILES, instance=request.user)
    if not form.is_valid():
-      # display error msg
       messages.error(request, 'Please correct the errors below!')
       return redirect(request.META.get('HTTP_REFERER'))
 
@@ -115,6 +114,7 @@ def user_login(request):
       return redirect(LOGIN_URL)
 
    login(request, user)
+   messages.success(request, 'Successfully logged in!')
    return redirect(HOME)
 
 

@@ -3,6 +3,8 @@ from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 
+import datetime as DT
+
 from dreamwed.models import User, Vendor, WeddingPlanner, Guest, Todo, BudgetItem, Review, VendorCategory, VendorImageUpload
 
 
@@ -17,9 +19,22 @@ class VendorRegForm(UserCreationForm):
    email = forms.EmailField(required=True)
 
    business_name = forms.CharField(required=True)
-   category = forms.ChoiceField(choices=vendor_categories())
-   description = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'cols': 30}))
-   services_offered = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'cols': 30}))
+   category = forms.ChoiceField(
+      required=True, 
+      choices=vendor_categories(),
+      )
+   description = forms.CharField(
+      required=True,
+      widget=forms.Textarea(attrs={
+         'rows': 5, 
+         'cols': 30,
+         }))
+   services_offered = forms.CharField(
+      required=True,
+      widget=forms.Textarea(attrs={
+         'rows': 5, 
+         'cols': 30,
+         }))
    city = forms.CharField(required=True)
    location = forms.CharField(required=True) # street code
 
@@ -42,9 +57,7 @@ class VendorRegForm(UserCreationForm):
       vendor.services_offered = self.cleaned_data['services_offered']
       vendor.city = self.cleaned_data['city']
       vendor.location = self.cleaned_data['location']
-
       vendor.save()
-      print(f'\nNew vendor, {vendor.business_name}, saved successfully!\n')
       return user
 
 
@@ -55,7 +68,10 @@ class WeddingPlannerRegForm(UserCreationForm):
    email = forms.EmailField(required=True)
    wedding_date = forms.DateField(
       required=False, 
-      widget=forms.DateInput(attrs={'type': 'date'}),
+      widget=forms.DateInput(attrs={
+         'type': 'date', 
+         'min': DT.date.today(),
+         }),
       )
 
    class Meta(UserCreationForm.Meta):
@@ -72,11 +88,8 @@ class WeddingPlannerRegForm(UserCreationForm):
 
       wedding_planner = WeddingPlanner.objects.create(user=user)
       wedding_planner.wedding_date = self.cleaned_data['wedding_date']
-
       wedding_planner.save()
-      print(f'\nNew vendor, {wedding_planner.user}, saved successfully!\n')
       return user
-
 
 
 class UserAccountInfoUpdateForm(ModelForm):
@@ -102,18 +115,29 @@ class WeddingPlannerProfileUpdateForm(ModelForm):
       model = WeddingPlanner
       fields = ['partner_first_name', 'partner_last_name', 'wedding_date']
       widgets = {
-         'wedding_date': forms.DateInput(attrs={'type': 'date'}),
+         'wedding_date': forms.DateInput(attrs={
+            'type': 'date', 
+            'min': DT.date.today(),
+            }),
       }
 
 
 class TodoForm(ModelForm):
    """Create new Todo form"""
+   def __init__(self, *args, **kwargs):
+      wedding_date = kwargs.pop('wedding_date')
+      super(TodoForm, self).__init__(*args, **kwargs)
+      self.fields['due_date'] = forms.DateField(
+         required=False,
+         widget=forms.DateInput(attrs={
+            'type': 'date', 
+            'min': DT.date.today(),
+            'max': wedding_date,
+         }))
+   
    class Meta:
       model = Todo
       fields = ['content', 'category', 'due_date']
-      widgets = {
-         'due_date': forms.DateInput(attrs={'type': 'date'}),
-      }
 
 
 class BudgetItemForm(ModelForm):
@@ -136,7 +160,11 @@ class ReviewForm(ModelForm):
       model = Review
       fields = ['stars', 'comment']
       widgets = {
-         'stars': forms.TextInput(attrs={'min': 1, 'max': 5,'type': 'number'}),
+         'stars': forms.TextInput(attrs={
+            'min': 1, 
+            'max': 5, 
+            'type': 'number',
+            }),
       }
 
 
