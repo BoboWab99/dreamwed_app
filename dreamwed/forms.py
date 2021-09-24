@@ -140,6 +140,13 @@ class TodoForm(ModelForm):
       fields = ['content', 'category', 'due_date']
 
 
+class WeddingBudgetForm(ModelForm):
+   """ Set wedding budget form """
+   class Meta:
+      model = WeddingPlanner
+      fields = ['wedding_budget']
+
+
 class BudgetItemForm(ModelForm):
    """Add new wedding expense form"""
    class Meta:

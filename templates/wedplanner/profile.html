@@ -6,9 +6,9 @@
       <div>
          <div class="text-muted">Partner Name:</div>
          {% if user.weddingplanner.partner_first_name or user.weddingplanner.partner_last_name %}
-         {{ user.weddingplanner.partner_first_name }} {{ user.weddingplanner.partner_last_name }}
+            {{ user.weddingplanner.partner_first_name }} {{ user.weddingplanner.partner_last_name }}
          {% else %}
-         Not set. <i>Click the <code>Edit</code> button to add your partner's names</i>
+            Not set. <i>Click the <code>Edit</code> button to add your partner's names</i>
          {% endif %}
       </div>
       <a href="{% url 'wedplanner-profile-update' %}" class="btn btn-outline-primary btn-sm ms-2">
@@ -20,9 +20,9 @@
       <div>
          <div class="text-muted">Wedding Day:</div>
          {% if user.weddingplanner.wedding_date %}
-         {{ user.weddingplanner.wedding_date }}
+            {{ user.weddingplanner.wedding_date }}
          {% else %}
-         Not set. <i>Click the <code>Edit</code> button to add your wedding day</i>
+            Not set. <i>Click the <code>Edit</code> button to add your wedding day</i>
          {% endif %}
       </div>
       <a href="{% url 'wedplanner-profile-update' %}" class="btn btn-outline-primary btn-sm ms-2">
@@ -38,7 +38,7 @@
 </div>
 
 <section class="py-2 mt-4">
-   <h6 class="mb-2">Todos</h6>
+   <h5 class="mb-2">Todos</h5>
    <div class="card-group justify-content-center text-center">
       <div class="card">
          <a href="{% url 'checklist-all' %}" class="d-block bg-light py-4">
@@ -62,7 +62,7 @@
 </section>
 
 <section class="py-2 mt-4">
-   <h6 class="mb-2">Budget items</h6>
+   <h5 class="mb-2">Budget items</h5>
    <div class="card-group justify-content-center text-center">
       <div class="card">
          <a href="{% url 'budget-manager' %}" class="d-block bg-light py-4">
@@ -89,10 +89,12 @@
          </div>
       </div>
    </div>
+
+   <div id="chartContainer" class="mt-5" style="height: 400px; max-width: 920px; margin: 0px auto;"></div>
 </section>
 
 <section class="py-2 mt-4">
-   <h6 class="mb-2">Guests</h6>
+   <h5 class="mb-2">Guests</h5>
    <div class="card-group justify-content-center text-center">
       <div class="card">
          <a href="{% url 'guestlist' %}" class="d-block bg-light py-4">
@@ -121,3 +123,64 @@
    </div>
 </section>
 {% endblock extra-profile-info %}
+
+{% block scripts %}
+<!-- Canvas Js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+
+<script>
+   window.onload = () => {
+      getAllbudgetItemsShare();
+   }
+
+   async function getAllbudgetItemsShare() {
+      let handleResponse = async function (response) {
+         let data = await response.json();
+         makePieChart(data);
+      }
+      url = `${LOCALHOST}/U/budget-manager/budget-items-share`;
+      fetchRequest(handleResponse, url, 'GET');
+   }
+
+   async function makePieChart(budgetItemsData) {
+      let dataPoints = []
+      let totalPaid = budgetItemsData.total_paid;
+      let budgetItemsShare = budgetItemsData.expense_categories_share;
+
+      for (let x in budgetItemsShare) {
+         let name = budgetItemsShare[x].expense_category_name;
+         let share = budgetItemsShare[x].expense_category_share;
+         share  = 100 * (share / totalPaid);
+
+         dataPoints.push({
+            y: share.toFixed(2),
+            label: name
+         });
+      }
+
+      let chart = new CanvasJS.Chart("chartContainer", {
+         theme: "light2",
+         exportFileName: "My-wedding-expenses-cost-share",
+         exportEnabled: true,
+         animationEnabled: true,
+         title: {
+            text: "Budget Items Cost Share",
+            fontSize: 22
+         },
+         subtitles: [{
+            text: "Calculated out of total amount paid",
+            fontSize: 16
+         }],
+         data: [{
+            type: "pie",
+            indexLabelFontSize: 14,
+            // startAngle: 120,
+            yValueFormatString: "##0.00\"%\"",
+            indexLabel: "{label} - {y}",
+            dataPoints: dataPoints
+         }]
+      });
+      chart.render();
+   }
+</script>
+{% endblock scripts %}

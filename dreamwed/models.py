@@ -86,6 +86,7 @@ class WeddingPlanner(models.Model):
    partner_first_name = models.CharField(max_length=50, blank=True, null=True)
    partner_last_name = models.CharField(max_length=50, blank=True, null=True)
    wedding_date = models.DateField(blank=True, null=True)
+   wedding_budget = models.FloatField(blank=True, null=True)
 
    def __str__(self):
       return f'{self.user}'

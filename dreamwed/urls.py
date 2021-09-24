@@ -18,8 +18,6 @@ urlpatterns = [
    path('U/account-info-update/', dreamwed.update_user_account_info, name='user-account-info-update'),
 
    path('csrf-token/', dreamwed.get_csrf),
-
-   # (r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/successfully_logged_out/'})
 ]
 
 
@@ -45,6 +43,9 @@ urlpatterns += [
    path('U/guestlist/<int:guest_id>/delete/', wedplanner.delete_guest, name='guest-delete'),
 
    path('U/budget-manager/', wedplanner.budget_manager, name='budget-manager'),
+   path('U/budget-manager/my-balance', wedplanner.my_balance),
+   path('U/budget-manager/budget-items-share', wedplanner.budget_items_share),
+   path('U/budget-manager/set-wedding-budget', wedplanner.set_wedding_budget),
    path('U/budget-manager/create-budget-item', wedplanner.create_budget_item),
    path('U/budget-manager/<int:budget_item_id>/update', wedplanner.update_budget_item),
    path('U/budget-manager/<int:budget_item_id>/delete', wedplanner.delete_budget_item),

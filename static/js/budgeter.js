@@ -4,28 +4,27 @@ const budgetItemsTableBody = document.querySelector('#BudgetItemsTable tbody');
 
 
 window.addEventListener('load', () => {
-   getAllGuests();
+   getAllbudgetItems();
+   renderWeddingBudgetBalanceBar();
 });
 
 
-async function getAllGuests() {
-   url = `${LOCALHOST}/U/budget-manager/`;
-
+async function getAllbudgetItems() {
    let handleResponse = async function (response) {
       let budgetItems = await response.json();
       renderGuests(budgetItems);
    }
+   url = `${LOCALHOST}/U/budget-manager/`;
    fetchRequest(handleResponse, url, 'GET');
 }
 
 
 async function getExpensesInCategory(category_id) {
-   url = `${LOCALHOST}/U/budget-manager/expenses-in-category/${category_id}`;
-
    let handleResponse = async function (response) {
       let budgetItems = await response.json();
       renderGuests(budgetItems);
    }
+   url = `${LOCALHOST}/U/budget-manager/expenses-in-category/${category_id}`;
    fetchRequest(handleResponse, url, 'GET');
 }
 
@@ -34,7 +33,6 @@ function renderGuests(budgetItems) {
    budgetItemsTableBody.innerHTML = '';
 
    budgetItems.forEach(budgetItem => {
-
       let jsonBudgetItem = JSON.stringify(budgetItem);
       let tableRow = `
          <tr class="budget-item">
@@ -105,9 +103,11 @@ async function createUpdateBudgetItemHelper(url, formData) {
 
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
-      // emptyFilter();
-      getAllGuests();
+      .then(res => {
+         console.log(res.msg)
+         getAllbudgetItems();
+         renderWeddingBudgetBalanceBar();
+      });
    }
    fetchRequest(handleResponse, url, 'POST', JSON.stringify(budgetItem));
 }
@@ -115,14 +115,62 @@ async function createUpdateBudgetItemHelper(url, formData) {
 
 // delete budget item 
 async function deleteBudgetItem(budgetItemId) {
+   let handleResponse = async function (response) {
+      await response.json()
+      .then(res => {
+         console.log(res.msg)
+         getAllbudgetItems();
+         renderWeddingBudgetBalanceBar();
+      });
+   }
    let url = `${LOCALHOST}/U/budget-manager/${budgetItemId}/delete`;
+   fetchRequest(handleResponse, url, 'DELETE');
+}
+
+
+// set wedding budget
+async function setWeddingBudget(event) {
+   event.preventDefault();
+
+   let weddingBudgetForm = event.target;
+   let formData = new FormData(weddingBudgetForm);
+   let weddingBudgetData = formData.get('wedding_budget');
+   let weddingBudget = {
+      wedding_budget: weddingBudgetData,
+   };
 
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
-      getAllGuests();
+      .then(res => {
+         console.log(res.msg);
+         document.getElementById('wedding-budget').innerHTML = res.budget;
+         renderWeddingBudgetBalanceBar();
+      });
    }
-   fetchRequest(handleResponse, url, 'DELETE');
+   let url = `${LOCALHOST}/U/budget-manager/set-wedding-budget`;
+   fetchRequest(handleResponse, url, 'POST', JSON.stringify(weddingBudget));
+}
+
+
+async function renderWeddingBudgetBalanceBar() {
+   let handleResponse = async function (response) {
+      await response.json()
+      .then(res => {
+         let wedding_budget = res.wedding_budget;
+         let total_paid = res.total_paid;
+         let spent_percent = 100 * (total_paid / wedding_budget);
+         spent_percent = spent_percent.toFixed(1);
+
+         document.getElementById('money-spent').innerHTML = `
+         <div class="mb-1">Amount spent so far: <b>KES ${total_paid}</b></div>
+         <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: ${spent_percent}%" aria-valuenow="${spent_percent}" aria-valuemin="0" aria-valuemax="100">${spent_percent}%</div>
+         </div>
+         `;
+      });
+   }
+   let url = `${LOCALHOST}/U/budget-manager/my-balance`;
+   fetchRequest(handleResponse, url, 'GET');
 }
 
 

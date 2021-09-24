@@ -8,12 +8,12 @@ from django.contrib.auth import login
 from django.contrib import messages
 from django.views.generic import CreateView
 from django.http import JsonResponse
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 from django.views.decorators.http import require_http_methods
 from django.db import connection
 
 from main.decorators import wedding_planner_required, unauthenticated_user
-from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm, BudgetItemUpdateForm, UpdateGuestForm
+from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm, BudgetItemUpdateForm, UpdateGuestForm, WeddingBudgetForm
 from dreamwed.models import User, Vendor, WeddingPlanner ,VendorCategory, Review, Guest, Todo, BudgetItem, Bookmark, ExpenseCategory, VendorImageUpload
 
 
@@ -411,6 +411,28 @@ def mark_task_as_complete(request, task_id):
 # -------------------------
 @login_required
 @wedding_planner_required
+@require_http_methods('POST')
+def set_wedding_budget(request):
+   budget_data = json.loads(request.body)
+   form = WeddingBudgetForm(budget_data)
+
+   if not form.is_valid():
+      messages.error(request, form.errors)
+      return JsonResponse({'msg:': form.errors.as_text()}, status=200)
+
+   wedplanner = WeddingPlanner.objects.get(user=request.user)
+   wedplanner.wedding_budget = form.cleaned_data['wedding_budget']
+   wedplanner.save()
+   messages.success(request, 'Wedding budget updated!')
+   response = {
+      'budget': form.cleaned_data['wedding_budget'],
+      'msg': 'Wedding budget updated!',
+   }
+   return JsonResponse(response, status=200)
+
+
+@login_required
+@wedding_planner_required
 def budget_manager(request):
    if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
       expenses = BudgetItem.objects.filter(wedplanner_id=request.user.id)
@@ -420,10 +442,12 @@ def budget_manager(request):
    expense_categories = ExpenseCategory.objects.all()
    create_form = BudgetItemForm()
    update_form = BudgetItemUpdateForm()
+   budget_form = WeddingBudgetForm(instance=request.user.weddingplanner)
 
    context = {
       'create_form': create_form,
       'update_form': update_form,
+      'budget_form': budget_form,
       'expense_categories': expense_categories,
    }
    return render(request, 'wedplanner/budget-manager.html', context)
@@ -447,6 +471,8 @@ def create_budget_item(request):
    if not form.is_valid():
       return redirect(request.META.get('HTTP_REFERER'))
 
+   wedding_budget = WeddingPlanner.objects.filter(user=request.user).values_list('wedding_budget')[0][0]
+   
    budget_item_content = form.cleaned_data['description']
    budget_item_expense_category = form.cleaned_data['expense_category']
    budget_item_cost = form.cleaned_data['cost']
@@ -486,6 +512,50 @@ def delete_budget_item(request, budget_item_id):
    budget_item_to_delete = BudgetItem.objects.get(id=budget_item_id, wedplanner_id=request.user.id)
    budget_item_to_delete.delete()
    return JsonResponse({'msg': 'Task deleted!'}, status=200)
+
+
+@login_required
+@wedding_planner_required
+def budget_items_share(request):
+   expense_categories = ExpenseCategory.objects.all()
+   expense_categories_share = []
+   total_paid = BudgetItem.objects.filter(
+      wedplanner_id=request.user.id
+      ).aggregate(total_paid=Sum('paid'))['total_paid']
+
+   for category in expense_categories:
+      category_share = BudgetItem.objects.filter(
+         wedplanner_id=request.user.id,
+         expense_category=category,
+         ).aggregate(total_price=Sum('paid'))['total_price']
+
+      if category_share:
+         expense_category = {
+            'expense_category_name': category.name,
+            'expense_category_share': category_share
+         }
+         expense_categories_share.append(expense_category)
+   
+   data = {
+      'total_paid': total_paid,
+      'expense_categories_share': expense_categories_share,
+   }
+   return JsonResponse(data, safe=False, status=200)
+
+
+@login_required
+@wedding_planner_required
+def my_balance(request):
+   wedding_budget = WeddingPlanner.objects.filter(user=request.user).values_list('wedding_budget')[0][0]
+   total_paid = BudgetItem.objects.filter(
+      wedplanner_id=request.user.id
+      ).aggregate(total_paid=Sum('paid'))['total_paid']
+
+   data = {
+      'wedding_budget': wedding_budget,
+      'total_paid': total_paid,
+   }
+   return JsonResponse(data, safe=False, status=200)
 
 
 #  RATE VENDOR
