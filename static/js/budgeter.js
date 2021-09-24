@@ -39,10 +39,10 @@ function renderGuests(budgetItems) {
             <td class="pointer" title="Click to update this budget item." data-bs-toggle="modal" data-bs-target="#updateExpense" onclick='fillBudgetItemSavedValues(\`${jsonBudgetItem}\`)'>
                <div class="expense-description">${budgetItem.description}</div>
             </td>
-            <td class="expense-cost">KES ${budgetItem.cost}</td>
-            <td class="expense-paid">KES ${budgetItem.paid ? budgetItem.paid : 0}</td>
-            <td>
-               <a class="pointer" onclick="deleteBudgetItem(${budgetItem.id})" title="Delete this budget item">
+            <td class="expense-cost"><div>KES ${budgetItem.cost}</div></td>
+            <td class="expense-paid"><div>KES ${budgetItem.paid ? budgetItem.paid : 0}</div></td>
+            <td class="text-end">
+               <a class="pointer fs-5" onclick="deleteBudgetItem(${budgetItem.id})" title="Delete this budget item">
                   <i class="fas fa-trash-alt"></i>
                </a>
             </td>
@@ -103,10 +103,11 @@ async function createUpdateBudgetItemHelper(url, formData) {
 
    let handleResponse = async function (response) {
       await response.json()
-      .then(res => {
-         console.log(res.msg)
+      .then(msg => {
+         console.log(msg)
          getAllbudgetItems();
          renderWeddingBudgetBalanceBar();
+         showNotification(msg);
       });
    }
    fetchRequest(handleResponse, url, 'POST', JSON.stringify(budgetItem));
@@ -142,9 +143,9 @@ async function setWeddingBudget(event) {
    let handleResponse = async function (response) {
       await response.json()
       .then(res => {
-         console.log(res.msg);
          document.getElementById('wedding-budget').innerHTML = res.budget;
          renderWeddingBudgetBalanceBar();
+         showNotification(res.msg);
       });
    }
    let url = `${LOCALHOST}/U/budget-manager/set-wedding-budget`;

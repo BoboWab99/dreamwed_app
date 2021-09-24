@@ -54,8 +54,6 @@ async function changeBookmarkStatus(checkbox) {
 
 // new bookmark
 async function bookmarkVendor(vendorId) {
-   url = `${LOCALHOST}/vendors/${vendorId}/bookmark`;
-
    let handleResponse = async function (response) {
       await response.json()
          .then(res => console.log(res.msg));
@@ -65,14 +63,13 @@ async function bookmarkVendor(vendorId) {
          getSavedVendors();
       }
    }
+   url = `${LOCALHOST}/vendors/${vendorId}/bookmark`;
    fetchRequest(handleResponse, url, 'GET');
 }
 
 
 // remove bookmark
 async function removeBookmark(vendorId) {
-   url = `${LOCALHOST}/vendors/${vendorId}/remove-bookmark`;
-
    let handleResponse = async function (response) {
       await response.json()
          .then(res => console.log(res.msg));
@@ -82,6 +79,7 @@ async function removeBookmark(vendorId) {
          getSavedVendors();
       }
    }
+   url = `${LOCALHOST}/vendors/${vendorId}/remove-bookmark`;
    fetchRequest(handleResponse, url, 'DELETE');
 }
 

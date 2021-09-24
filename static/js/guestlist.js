@@ -9,24 +9,22 @@ window.addEventListener('load', () => {
 
 
 async function getAllGuests() {
-   url = `${LOCALHOST}/U/guestlist/`;
-
    let handleResponse = async function (response) {
       let guests = await response.json();
       console.log(guests);
       renderGuests(guests);
    }
+   url = `${LOCALHOST}/U/guestlist/`;
    fetchRequest(handleResponse, url, 'GET');
 }
 
 
 async function getExpensesInCategory(category_id) {
-   url = `${LOCALHOST}/U/budget-manager/expenses-in-category/${category_id}`;
-
    let handleResponse = async function (response) {
       let guests = await response.json();
       renderGuests(guests);
    }
+   url = `${LOCALHOST}/U/budget-manager/expenses-in-category/${category_id}`;
    fetchRequest(handleResponse, url, 'GET');
 }
 
@@ -35,8 +33,6 @@ function renderGuests(guests) {
    guestlistTableBody.innerHTML = '';
 
    guests.forEach(guest => {
-
-      // let jsonGuest = JSON.stringify(guest);
       let tableRow = `
          <tr class="guestlist-item">
             <td>
@@ -46,10 +42,10 @@ function renderGuests(guests) {
                   <a href="mailto:${guest.email}" class="ms-3"><i class="fas fa-envelope fs-5"></i> Email</a>
                </div>
             </td>
-            <td>${guest.rsvp}</td>
-            <td>${guest.note}</td>
+            <td><div>${guest.rsvp}</div></td>
+            <td><div>${guest.note}</div></td>
             <td>
-               <div class="dropdown">
+               <div class="dropdown text-end px-0">
                   <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false"></button>
                   
                   <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownMenu2">
@@ -109,14 +105,13 @@ async function createUpdateGuestHelper(url, formData) {
       note: guestNote,
    };
 
-   console.log('Submitted guest data:');
-   console.log(guest);
-
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
-      // emptyFilter();
-      getAllGuests();
+      .then(msg => {
+         // emptyFilter();
+         getAllGuests();
+         showNotification(msg);
+      });
    }
    fetchRequest(handleResponse, url, 'POST', JSON.stringify(guest));
 }
@@ -124,13 +119,14 @@ async function createUpdateGuestHelper(url, formData) {
 
 // delete guest
 async function deleteGuest(guestId) {
-   let url = `${LOCALHOST}/U/guestlist/${guestId}/delete/`;
-
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
-      getAllGuests();
+      .then(msg => {
+         getAllGuests();
+         showNotification(msg);
+      });
    }
+   let url = `${LOCALHOST}/U/guestlist/${guestId}/delete/`;
    fetchRequest(handleResponse, url, 'DELETE');
 }
 

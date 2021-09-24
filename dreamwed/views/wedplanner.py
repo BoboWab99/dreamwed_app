@@ -15,6 +15,7 @@ from django.db import connection
 from main.decorators import wedding_planner_required, unauthenticated_user
 from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm, BudgetItemUpdateForm, UpdateGuestForm, WeddingBudgetForm
 from dreamwed.models import User, Vendor, WeddingPlanner ,VendorCategory, Review, Guest, Todo, BudgetItem, Bookmark, ExpenseCategory, VendorImageUpload
+from main.settings import MSG_TAGS
 
 
 def dictfetchall(cursor):
@@ -192,10 +193,11 @@ def update_wedplanner_profile(request):
 
    form = WeddingPlannerProfileUpdateForm(request.POST, instance=request.user.weddingplanner) 
    if not form.is_valid():
-      messages.error(request, 'Form is not valid!')
+      messages.error(request, form.errors.as_text())
       return redirect(request.META.get('HTTP_REFERER'))
 
    form.save()
+   messages.success(request, 'Profile info updated successfully!')
    return redirect('user-profile')
 
 
@@ -229,6 +231,7 @@ def add_guest(request):
    guest_email = form.cleaned_data['email']
    guest_phone_number = form.cleaned_data['phone_number']
    guest_rsvp = form.cleaned_data['rsvp']
+   guest_note = form.cleaned_data['note']
 
    new_guest = Guest(
       wedplanner_id=request.user.id,
@@ -236,9 +239,14 @@ def add_guest(request):
       name=guest_name,  
       email=guest_email,  
       rsvp=guest_rsvp,
+      note=guest_note,
       )
    new_guest.save()
-   return JsonResponse({'msg': 'New guest added!'}, status=200)
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'New guest added!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 @login_required
@@ -259,6 +267,7 @@ def update_guest(request, guest_id):
    guest_to_update.rsvp = form.cleaned_data['rsvp']
    guest_to_update.note = form.cleaned_data['note']
    guest_to_update.save()
+   messages.success(request, 'Guest data updated!')
    return redirect('guestlist')
 
 
@@ -267,7 +276,11 @@ def update_guest(request, guest_id):
 def delete_guest(request, guest_id):
    guest_to_delete = Guest.objects.get(id=guest_id)
    guest_to_delete.delete()
-   return JsonResponse({'msg': 'Guest deleted!'}, status=200)
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'Guest deleted!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 #  CHECKLIST 
@@ -292,8 +305,7 @@ def check_list(request):
       response = execute_raw_fetch(raw_query)
       return JsonResponse(response, safe=False, status=200)
 
-   wedplanner = WeddingPlanner.objects.get(user=request.user)
-   form = TodoForm(wedding_date=wedplanner.wedding_date)
+   form = TodoForm(wedding_date=request.user.weddingplanner.wedding_date)
    all_todos = Todo.objects.filter(wedplanner_id=request.user.id)
    context = {
       'todos': all_todos,
@@ -349,15 +361,18 @@ def tasks_completed(request):
 @require_http_methods('POST')
 def create_task(request):
    task = json.loads(request.body)
-   form = TodoForm(task)
+   form = TodoForm(task, wedding_date=request.user.weddingplanner.wedding_date)
 
    if not form.is_valid():
-      return redirect(request.META.get('HTTP_REFERER'))
+      msg = {
+         'tag': MSG_TAGS['error'],
+         'content': form.errors.as_text(),
+      }
+      return JsonResponse(msg, status=200)
 
    task_content = form.cleaned_data['content']
    task_category = form.cleaned_data['category']
    task_due_date = form.cleaned_data['due_date']
-
    new_task = Todo(
       wedplanner_id=request.user.id,
       content=task_content, 
@@ -365,7 +380,11 @@ def create_task(request):
       due_date=task_due_date, 
       )
    new_task.save()
-   return JsonResponse({'msg': 'Task created!'}, status=200)
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'New task added successfully!',
+   }
+   return JsonResponse(msg, status=200)
    
 
 @login_required
@@ -373,7 +392,11 @@ def create_task(request):
 def delete_task(request, task_id):
    task_to_delete = Todo.objects.get(wedplanner_id=request.user.id, id=task_id)
    task_to_delete.delete()
-   return JsonResponse({'msg': 'Task deleted!'}, status=200)
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'Task deleted!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 @login_required
@@ -381,17 +404,25 @@ def delete_task(request, task_id):
 @require_http_methods('POST')
 def update_task(request, task_id):
    task = json.loads(request.body)
-   form = TodoForm(task)
+   form = TodoForm(task, wedding_date=request.user.weddingplanner.wedding_date)
 
    if not form.is_valid():
-      return redirect(request.META.get('HTTP_REFERER'))
+      msg = {
+         'tag': MSG_TAGS['error'],
+         'content': form.errors.as_text(),
+      }
+      return JsonResponse(msg, status=200)
 
    task_to_update = Todo.objects.get(id=task_id, wedplanner_id=request.user.id)
    task_to_update.content = form.cleaned_data['content'] 
    task_to_update.category = form.cleaned_data['category']
    task_to_update.due_date = form.cleaned_data['due_date']
    task_to_update.save()
-   return JsonResponse({'msg': 'Task updated!'}, status=200)
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'Task updated successfully!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 @login_required
@@ -423,10 +454,12 @@ def set_wedding_budget(request):
    wedplanner = WeddingPlanner.objects.get(user=request.user)
    wedplanner.wedding_budget = form.cleaned_data['wedding_budget']
    wedplanner.save()
-   messages.success(request, 'Wedding budget updated!')
    response = {
       'budget': form.cleaned_data['wedding_budget'],
-      'msg': 'Wedding budget updated!',
+      'msg': {
+         'tag': MSG_TAGS['success'],
+         'content': 'Wedding budget updated!',
+      }
    }
    return JsonResponse(response, status=200)
 
@@ -469,10 +502,12 @@ def create_budget_item(request):
    form = BudgetItemForm(budget_item_data)
 
    if not form.is_valid():
-      return redirect(request.META.get('HTTP_REFERER'))
+      msg = {
+         'tag': MSG_TAGS['error'],
+         'content': form.errors.as_text(),
+      }
+      return JsonResponse(msg, status=200)
 
-   wedding_budget = WeddingPlanner.objects.filter(user=request.user).values_list('wedding_budget')[0][0]
-   
    budget_item_content = form.cleaned_data['description']
    budget_item_expense_category = form.cleaned_data['expense_category']
    budget_item_cost = form.cleaned_data['cost']
@@ -484,7 +519,11 @@ def create_budget_item(request):
       cost=budget_item_cost,
       )
    new_budget_item.save()
-   return JsonResponse({'msg': 'Budget item created!'}, status=200)
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'Budget item updated successfully!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 @login_required
@@ -495,15 +534,47 @@ def update_budget_item(request, budget_item_id):
    form = BudgetItemUpdateForm(budget_item_data)
 
    if not form.is_valid():
-      return redirect(request.META.get('HTTP_REFERER'))
+      msg = {
+         'tag': MSG_TAGS['warning'],
+         'content': form.errors.as_text(),
+      }
+      return JsonResponse(msg, status=200)
+
+   description = form.cleaned_data['description']
+   expense_category = form.cleaned_data['expense_category']
+   cost = form.cleaned_data['cost']
+   paid = form.cleaned_data['paid']
+   if paid > cost:
+      msg = {
+         'tag': MSG_TAGS['warning'],
+         'content': 'Update failed! Paid amount can\'t be greater than the service/product cost!',
+      }
+      return JsonResponse(msg, status=200)
+
+   wedding_budget = WeddingPlanner.objects.filter(user=request.user).values_list('wedding_budget')[0][0]
+   total_cost = BudgetItem.objects.filter(
+      wedplanner_id=request.user.id
+      ).aggregate(total_cost=Sum('cost'))['total_cost']
+
+   total_cost += cost
+   if total_cost > wedding_budget:
+      msg = {
+         'tag': MSG_TAGS['warning'],
+         'content': 'Update failed! You are going over budget!',
+      }
+      return JsonResponse(msg, status=200)
 
    budget_item_to_update = BudgetItem.objects.get(id=budget_item_id, wedplanner_id=request.user.id)
-   budget_item_to_update.description = form.cleaned_data['description'] 
-   budget_item_to_update.expense_category = form.cleaned_data['expense_category'] 
-   budget_item_to_update.cost = form.cleaned_data['cost']
-   budget_item_to_update.paid = form.cleaned_data['paid']
+   budget_item_to_update.description = description
+   budget_item_to_update.expense_category = expense_category
+   budget_item_to_update.cost = cost
+   budget_item_to_update.paid = paid
    budget_item_to_update.save()
-   return JsonResponse({'msg': 'Budget item updated!'}, status=200)
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'Budget item updated successfully!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 @login_required
@@ -511,7 +582,11 @@ def update_budget_item(request, budget_item_id):
 def delete_budget_item(request, budget_item_id):
    budget_item_to_delete = BudgetItem.objects.get(id=budget_item_id, wedplanner_id=request.user.id)
    budget_item_to_delete.delete()
-   return JsonResponse({'msg': 'Task deleted!'}, status=200)
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'Task deleted successfully!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 @login_required
@@ -567,12 +642,11 @@ def save_review(request, vendor_id):
    form = ReviewForm(request.POST)
 
    if not form.is_valid():
-      messages.error(request, 'Form ain\'t valid')
+      messages.error(request, form.errors)
       return redirect(request.META.get('HTTP_REFERER'))
 
    rating = form.cleaned_data['stars']
    review = form.cleaned_data['comment']
-
    new_review = Review(
       wedplanner_id=request.user.id,
       vendor_id=vendor_id,
@@ -580,6 +654,7 @@ def save_review(request, vendor_id):
       stars=rating, 
       )
    new_review.save()
+   messages.success(request, 'Review saved!')
    return redirect(request.META.get('HTTP_REFERER'))
 
 
@@ -594,12 +669,13 @@ def update_review(request, review_id):
 
    review_form = ReviewForm(request.POST)
    if not review_form.is_valid():
-      messages.error(request, 'Form ain\'t valid')
+      messages.error(request, review_form.errors)
       return redirect(request.META.get('HTTP_REFERER'))
 
    review_to_update.comment = review_form.cleaned_data['comment']
    review_to_update.stars = review_form.cleaned_data['stars']
    review_to_update.save()
+   messages.success(request, 'Comment updated!')
    return redirect('vendor-details', vendor_id=review_to_update.vendor_id)
 
 

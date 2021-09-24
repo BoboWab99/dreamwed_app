@@ -130,3 +130,34 @@ async function getCsrfToken() {
    const csrfToken = response.csrf_token;
    return csrfToken;
 }
+
+
+// async messages
+function showNotification(message) {
+   let output = '';
+
+   if (message.tag) {
+      output = `
+      <div class="${message.tag}">
+         <div class="container">
+            <div class="alert ${message.tag} alert-dismissible fade show border-0 px-0 m-0" role="alert">
+               ${message.content}
+               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+         </div>
+      </div>
+      `;
+   } else {
+      output = `
+      <div class="alert-danger">
+         <div class="container">
+            <div class="alert alert-danger alert-dismissible fade show border-0 px-0" role="alert">
+               ${message}
+               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+         </div>
+      </div>
+      `;
+   }
+   document.getElementById('notification').innerHTML = output;
+}

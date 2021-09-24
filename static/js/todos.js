@@ -90,9 +90,7 @@ function renderTodos(tasks) {
    tasksTableBody.innerHTML = '';
 
    tasks.forEach(todo => {
-
       let jsonTodo = JSON.stringify(todo);
-
       let tableRow = `
       <tr class="checklist-item">
          <td>
@@ -105,12 +103,11 @@ function renderTodos(tasks) {
          <td style="text-transform: capitalize;">
             <span class="todo-due-date">${formatDate(todo.due_date)}</span>
          </td>
-         <td>
-            <a class="pointer" onclick="deleteTask(${todo.todo_id})"><i class="fas fa-trash-alt"></i></a>
+         <td class="text-end">
+            <a class="pointer fs-5" onclick="deleteTask(${todo.todo_id})"><i class="fas fa-trash-alt"></i></a>
          </td>
       </tr>
       `;
-      
       tasksTableBody.innerHTML += tableRow;
    });
 }
@@ -132,7 +129,6 @@ async function getTasksInProgress() {
 
 async function fetchTasksHelper(response) {
    let tasks = await response.json();
-
    renderTodos(tasks);
    emptyFilters();
    handleTodoStatus();
@@ -174,9 +170,11 @@ async function createUpdateTaskHelper(url, formData) {
 
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
-      emptyFilters();
-      getAllTasks();
+      .then(msg => {
+         emptyFilters();
+         getAllTasks();
+         showNotification(msg);
+      });
    }
    fetchRequest(handleResponse, url, 'POST', JSON.stringify(todo));
 }
@@ -184,25 +182,27 @@ async function createUpdateTaskHelper(url, formData) {
 
 // delete task 
 async function deleteTask(taskId) {
-   let url = `${LOCALHOST}/U/checklist/${taskId}/delete`;
-
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
-      getAllTasks();
+      .then(msg => {
+         getAllTasks();
+         showNotification(msg);
+      });
    }
+   let url = `${LOCALHOST}/U/checklist/${taskId}/delete`;
    fetchRequest(handleResponse, url, 'DELETE');
 }
 
 
 // change task status
 async function changeTaskStatus(taskId) {
-   let url = `${LOCALHOST}/U/checklist/${taskId}/mark-complete`;
-
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
-      getAllTasks();
+      .then(res => {
+         console.log(res.msg);
+         getAllTasks();
+      });
    }
+   let url = `${LOCALHOST}/U/checklist/${taskId}/mark-complete`;
    fetchRequest(handleResponse, url, 'GET');
 }

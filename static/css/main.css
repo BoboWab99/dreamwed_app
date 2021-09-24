@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;1,300&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bilbo+Swash+Caps&family=Carattere&family=Fleur+De+Leah&family=Pinyon+Script&display=swap');
 
 html, body {
    font: 400 14px/1.5 'Poppins', sans-serif;
@@ -15,6 +16,15 @@ input[type='checkbox'] {
    display: inline-block;
    width: 20px;
    height: 20px;
+}
+
+#logo {
+   /* font-family: 'Carattere', cursive; */
+   font-family: 'Fleur De Leah', cursive;
+   /* font-family: 'Pinyon Script', cursive; */
+   font-size: 30px;
+   /* font-weight: 600; */
+   line-height: 1;
 }
 
 a {text-decoration: none;}
@@ -160,8 +170,6 @@ input:disabled {display: none;}
    padding: 12px 0;
 }
 
-
-
 /* wab menu */
 #menu {
   display: flex;
@@ -218,7 +226,7 @@ input:disabled {display: none;}
 @media screen and (min-width: 800px) {
    #menu {display: none;}
 
-   #navbar .container {
+   #navbar .nav-container {
       display: flex;
       justify-content: space-between;
    }

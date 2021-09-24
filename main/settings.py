@@ -164,3 +164,12 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+
+# Custom msg
+MSG_TAGS = {
+    'info': 'alert-info',
+    'success': 'alert-success',
+    'warning': 'alert-warning',
+    'error': 'alert-danger',
+}
