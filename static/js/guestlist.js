@@ -42,7 +42,7 @@ function renderGuests(guests) {
                   <a href="mailto:${guest.email}" class="ms-3"><i class="fas fa-envelope fs-5"></i> Email</a>
                </div>
             </td>
-            <td><div>${guest.rsvp}</div></td>
+            <td><div class="rsvp-status">${guest.rsvp}</div></td>
             <td><div>${guest.note}</div></td>
             <td>
                <div class="dropdown text-end px-0">
@@ -131,38 +131,20 @@ async function deleteGuest(guestId) {
 }
 
 
-function passesCostFilter(filter, cost, paid) {
-   const fully_paid = 'full';
-   const partially_paid = 'partial';
-   const not_paid = 'no';
-
-   switch (filter) {
-      case not_paid:
-         return paid == 0;
-      case fully_paid:
-         return cost == paid;
-      case partially_paid:
-         return cost > paid && paid > 0;
-      default:
-         return true;
-   }
-}
-
-
-// JQuery Filter For budget items
+// JQuery Filter For Guests
 $(document).ready(function () {
    $('#rsvp-filter').on('change', function () {
-      let costFilter = $(this).children("option:selected").val();
+      let rsvpFilter = $(this).children("option:selected").text().toLowerCase();
+      let noFilter = '---------';
 
-      $('tr.budget-item').each(function () {
-         let cost = $(this).find('.expense-cost').text();
-         let paid = $(this).find('.expense-paid').text();
+      $('tr.guestlist-item').each(function () {
+         let rsvp = $(this).find('.rsvp-status').text().toLowerCase();
 
-         cost = Number(cost.slice(3));
-         paid = Number(paid.slice(3));
-
-         // Show/Hide budget items
-         $(this).toggle(passesCostFilter(costFilter, cost, paid));
+         if (rsvpFilter == noFilter) {
+            $(this).show();
+         } else {
+            $(this).toggle(rsvp.includes(rsvpFilter));
+         }
       });
    });
 });

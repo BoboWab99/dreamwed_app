@@ -5,32 +5,38 @@
 {% block body %}
 {% include 'include/header.html' %}
 
-<section class="text-center py-5 mt-3">
-   <div class="container center">
-      <h2>Find the right vendor</h2>
+<section class="py-5">
+   <div class="container">
+      <h3 class="text-center mb-4">Find the right vendor</h3>
       
-      <form class="srch">
-         <div class="form-group mb-3">
-            <label for="service" class="form-label">Category:</label>
-            <select name="service" id="service" class="form-control">
-               {% for vendor_type in vendor_categories %}
-                  <option value="{{ vendor_type.id }}">{{ vendor_type.name }}</option>
-               {% endfor %}
-            </select>
-         </div>
+      <form name="search-vendors" method="POST" class="d-flex align-items-end justify-content-center">
+         {% csrf_token %}
 
-         <div class="form-group mb-3">
-            <label for="location" class="form-label">Near:</label>
-            <input type="text" class="form-control" name="location" id="location" placeholder="Westlands, Nairobi">
+         <div>
+            <label for="browse-v-categories" class="form-label">Category:</label>
+            <input type="text" id="browse-v-categories" list="v-categories" class="form-control">
+            <datalist id="v-categories">
+               {% for vendor_type in vendor_categories %}
+                  <option value="{{ vendor_type.name }}">
+               {% endfor %}
+            </datalist>
          </div>
-         <button type="submit" class="btn btn-primary">Search</button>
+         
+         <div class="ms-2">
+            <label for="browse-v-locations" class="form-label">Near:</label>
+            <input type="text" id="browse-v-locations" list="v-locations" class="form-control">
+            <datalist id="v-locations">
+               {% for location in vendor_locations %}
+                  <option value="{{ location.city }}">
+               {% endfor %}
+            </datalist>
+         </div>
+         <button type="submit" class="btn btn-primary ms-2">Search</button>
       </form>
    </div>
 </section>
 
-<hr>
-
-<section class="vendors-page">
+<section class="vendors-page bg-light border-top py-4">
    <div class="container">
       <!-- <p class="m-0">
          <i class="fas fa-search"></i>

@@ -29,7 +29,12 @@ SOME SYSTEM USERS
 Admin: Admin
 Email: dreamwed.admin@exam.com
 
-Vendors: kenpics, wedcakes
-WedPlanners: JeffK, Bobo
+Vendors: kenpics, wedcakes, djshiti, princegarden, samone
+WedPlanners: JeffK, Bobo, fsiva
 
 Password: drwdUserPa$$
+
+
+
+---------------------
+show deleted budget items/confirmation msg before deleting

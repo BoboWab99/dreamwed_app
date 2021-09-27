@@ -97,8 +97,8 @@ async function createUpdateBudgetItemHelper(url, formData) {
    let budgetItem = {
       description: budgetItemContent,
       expense_category: budgetItemExpenseCategory,
-      cost: budgetItemCost,
-      paid: budgetItemPaid,
+      cost: budgetItemCost ? budgetItemCost : 0,
+      paid: budgetItemPaid ? budgetItemPaid : 0,
    };
 
    let handleResponse = async function (response) {
@@ -118,8 +118,9 @@ async function createUpdateBudgetItemHelper(url, formData) {
 async function deleteBudgetItem(budgetItemId) {
    let handleResponse = async function (response) {
       await response.json()
-      .then(res => {
-         console.log(res.msg)
+      .then(msg => {
+         console.log(msg)
+         showNotification(msg);
          getAllbudgetItems();
          renderWeddingBudgetBalanceBar();
       });

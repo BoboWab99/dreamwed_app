@@ -4,7 +4,6 @@
 {% block title %} Guestlist Manager {% endblock %}
 
 {% block body %}
-
 <!-- Modal -->
 <div class="modal fade" id="addGuest" tabindex="-1" role="dialog" aria-labelledby="addGuestTitle" aria-hidden="true">
    <div class="modal-dialog modal-dialog-scrollable" role="document">
@@ -57,24 +56,22 @@
                <span>FILTER BY:</span>
                <div class="form-group mx-2 mb-0">
                   <label for="">RSVP Status:</label>
-                  <select name="rsvp" id="rsvp"  class="form-select">
-                     <option value="" hidden>RSVP Status</option>
-                     <option value="">Pending</option>
-                     <option value="">Attending</option>
-                     <option value="">Declined</option>
+                  <select name="rsvp" id="rsvp-filter"  class="form-select">
+                     <option value="" selected>---------</option>
+                     {% for option in rsvp_choices %}
+                        <option value="{{ option.0 }}">{{ option.1 }}</option>
+                     {% endfor %}
                   </select>
                </div>
             </div>
 
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGuest">
                <i class="fas fa-plus"></i>
-               <span>New Guest</span>
+               <span class="ms-1">New Guest</span>
             </button>
          </div>
 
-         <br><br>
-
-         <table class="table" id="guestlistTable">
+         <table class="table mt-4" id="guestlistTable">
             <thead>
                <tr>
                   <th>Name</th>
@@ -84,7 +81,7 @@
                </tr>
             </thead>
 
-            <tbody class="table"></tbody>
+            <tbody></tbody>
          </table>
       </div>
    </div>

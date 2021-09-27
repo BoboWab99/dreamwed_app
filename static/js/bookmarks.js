@@ -56,7 +56,11 @@ async function changeBookmarkStatus(checkbox) {
 async function bookmarkVendor(vendorId) {
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
+      .then(msg => {
+         console.log(msg);
+         showNotification(msg);
+      });
+
       if (typeof getAllVendors === 'function') {
          getAllVendors();
       } else {
@@ -72,7 +76,10 @@ async function bookmarkVendor(vendorId) {
 async function removeBookmark(vendorId) {
    let handleResponse = async function (response) {
       await response.json()
-         .then(res => console.log(res.msg));
+      .then(msg => {
+         console.log(msg);
+         showNotification(msg);
+      });
       if (typeof getAllVendors === 'function') {
          getAllVendors();
       } else {

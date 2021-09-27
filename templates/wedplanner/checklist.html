@@ -92,12 +92,12 @@
                <div class="d-flex sm-gap">
                   <div class="form-group m-0">
                      <label for="">Category:</label>
-                     {% render_field form.category class+="filter-todos filter-category form-control" %}
+                     {% render_field form.category class+="filter-todos filter-category form-select" %}
                   </div>
                   
                   <div class="form-group m-0">
-                     <label for="">Due date:</label>
-                     <select name="due-date" id="filter-due-date" class="filter-todos filter-date form-control">
+                     <label for="filter-due-date">Due date:</label>
+                     <select name="due-date" id="filter-due-date" class="filter-todos filter-date form-select">
                         <option value="" selected>---------</option>
                      </select>
                   </div>
@@ -106,13 +106,11 @@
 
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTask">
                <i class="fas fa-plus"></i>
-               <span>New Task</span>
+               <span class="ms-1">New Task</span>
             </button>
          </div>
 
-         <br><br>
-
-         <table class="table" id="todosTable">
+         <table class="table mt-4" id="todosTable">
             <thead>
                <tr>
                   <th>Done</th>

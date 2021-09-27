@@ -42,7 +42,7 @@ def verified_vendors():
 
    for vendor_id in all_vendors_ids:
       this_vendor_pics = VendorImageUpload.objects.filter(vendor_id=vendor_id).count()
-      if (this_vendor_pics > enough_pics):
+      if (this_vendor_pics >= enough_pics):
          verified_vendors_ids.append(vendor_id[0])
 
    return tuple(verified_vendors_ids)
@@ -53,7 +53,12 @@ def verified_vendors():
 def vendors(request):
    if(not request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
       vendor_categories = VendorCategory.objects.all()
-      context = {'vendor_categories': vendor_categories}
+      vendor_locations = Vendor.objects.values('city').distinct()
+
+      context = {
+         'vendor_categories': vendor_categories,
+         'vendor_locations': vendor_locations,
+      }
       return render(request, 'wedplanner/vendors.html', context)
 
    verified = f'''
@@ -153,12 +158,21 @@ def bookmarks(request):
    return JsonResponse(data, safe=False, status=200)
 
 
-@login_required
-@wedding_planner_required
 def bookmark_vendor(request, vendor_id):
+   if not request.user.is_authenticated:
+      msg = {
+         'tag': MSG_TAGS['error'],
+         'content': 'Login required!',
+      }
+      return JsonResponse(msg, status=200)
+
    new_bookmark = Bookmark(wedplanner_id=request.user.id, vendor_id=vendor_id)
    new_bookmark.save()
-   return JsonResponse({'msg': 'New bookmark added!'})
+   msg = {
+      'tag': MSG_TAGS['success'],
+      'content': 'New bookmark added!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 @login_required
@@ -166,7 +180,11 @@ def bookmark_vendor(request, vendor_id):
 def delete_bookmarked_vendor(request, vendor_id):
    bookmark = Bookmark.objects.get(wedplanner_id=request.user.id, vendor_id=vendor_id)
    bookmark.delete()
-   return JsonResponse({'msg': 'Bookmark deleted!'})
+   msg = {
+      'tag': MSG_TAGS['warning'],
+      'content': 'Bookmark deleted!',
+   }
+   return JsonResponse(msg, status=200)
 
 
 #  REGISTRATION 
@@ -212,7 +230,11 @@ def guest_list(request):
       return JsonResponse(data, safe=False, status=200)
 
    form = GuestForm()
-   context = {'form': form}
+   rsvp_choices = Guest._meta.get_field('rsvp').choices
+   context = {
+      'form': form,
+      'rsvp_choices': rsvp_choices,
+   }
    return render(request, 'wedplanner/guestlist.html', context)
 
 
