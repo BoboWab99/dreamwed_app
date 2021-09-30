@@ -134,31 +134,27 @@ async function getCsrfToken() {
 
 // async messages
 function showNotification(message) {
-   let output = '';
+   let message_tag;
+   let message_content;
 
    if (message.tag) {
-      output = `
-      <div class="${message.tag}">
-         <div class="container">
-            <div class="alert ${message.tag} alert-dismissible fade show border-0 px-0 m-0" role="alert">
-               ${message.content}
-               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-         </div>
-      </div>
-      `;
+      message_tag = message.tag;
+      message_content = message.content;
    } else {
-      output = `
-      <div class="alert-danger">
-         <div class="container">
-            <div class="alert alert-danger alert-dismissible fade show border-0 px-0" role="alert">
-               ${message}
-               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+      message_tag = 'alert-danger';
+      message_content = message;
+   }
+
+   let output = `
+   <div class="${message_tag}">
+      <div class="container">
+         <div class="alert ${message_tag} alert-dismissible fade show border-0 px-0 m-0" role="alert">
+            ${message_content}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
          </div>
       </div>
-      `;
-   }
+   </div>
+   `;
    document.getElementById('notification').innerHTML = output;
 }
 
@@ -167,11 +163,11 @@ function showNotification(message) {
 function activateNavItems() {
    document.querySelectorAll('.nav-item').forEach((navItem) => {
       navItem.addEventListener('click', function () {
-         if (activeNavItem == this) return;
-
-         activeNavItem.classList.remove('nav-item-active');
-         this.classList.add('nav-item-active');
-         activeNavItem = this;
+         if (activeNavItem != this) {
+            activeNavItem.classList.remove('nav-item-active');
+            this.classList.add('nav-item-active');
+            activeNavItem = this;
+         }
       });
    });
 }
