@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;1,300&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Bilbo+Swash+Caps&family=Carattere&family=Fleur+De+Leah&family=Pinyon+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap');
 
 html, body {
    font: 400 14px/1.5 'Poppins', sans-serif;
@@ -91,6 +92,12 @@ input:disabled {display: none;}
    height: var(--size);
 }
 
+.circle-sm {
+   --size: 35px;
+   width: var(--size);
+   height: var(--size);
+}
+
 .form-group {
    text-align: left;
    max-width: 450px;
@@ -125,14 +132,20 @@ input:disabled {display: none;}
    background-size:cover;
 }
 
-.profile-pic {
-   --pic-size: 150px;
-
-   width: var(--pic-size);
-   height: var(--pic-size);;
+#dropdownProfile::after {
+   display: none; 
+}
+.dropdown-item-no-hover:hover {
+   background: initial;
+   color: initial;
 }
 
-/* TOOLS NAV */
+.side-nav {
+   height: 75vh;
+   overflow-y: auto;
+}
+
+/* tools nav */
 #tools-nav {border-bottom: 1px solid #ccc;}
 #tools-nav .tool + .tool {
    margin-left: 3rem;
@@ -144,8 +157,20 @@ input:disabled {display: none;}
 
 
 /* navbar */
-#navbar {background: steelblue;}
+#navbar {background: steelblue;} 
 #navbar a {color: #eee;}
+
+.nav-item {
+   width: 100%;
+   display: inline-block;
+   padding: 0.85rem 1rem;
+}
+
+.nav-item.nav-item-active {
+   background: steelblue;
+   color: #fff;
+   border-radius: 0 3rem 3rem 0;
+}
 
 #navbar .nav-secondary {
    max-height: 0;
@@ -229,6 +254,7 @@ input:disabled {display: none;}
    #navbar .nav-container {
       display: flex;
       justify-content: space-between;
+      align-items: center;
    }
 
    #navbar .nav-secondary {

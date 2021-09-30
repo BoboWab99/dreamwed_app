@@ -1,10 +1,13 @@
 // BUDGET MANAGER PAGE
 
 const guestlistTableBody = document.querySelector('#guestlistTable tbody');
+let activeNavItem;
 
 
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
+   activeNavItem = document.querySelector('.nav-item-active');
    getAllGuests();
+   activateNavItems();
 });
 
 

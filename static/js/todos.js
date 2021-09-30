@@ -3,9 +3,11 @@
 const tasksTableBody = document.querySelector('#todosTable tbody');
 const dateFilterSelect = document.getElementById('filter-due-date');
 const categoryFilterSelect = document.querySelector('select.filter-category');
+let activeNavItem;
 
 
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
+   activeNavItem = document.querySelector('.nav-item-active');
    const dateFilter = getDateFilter();
 
    // Populate Date Filter Options
@@ -16,6 +18,7 @@ window.addEventListener('load', () => {
       dateFilterSelect.appendChild(dateFilterOption);
    }
    getAllTasks();
+   activateNavItems();
 });
 
 

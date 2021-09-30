@@ -1,11 +1,14 @@
 // BUDGET MANAGER PAGE
 
 const budgetItemsTableBody = document.querySelector('#BudgetItemsTable tbody');
+let activeNavItem;
 
 
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
+   activeNavItem = document.querySelector('.nav-item-active');
    getAllbudgetItems();
    renderWeddingBudgetBalanceBar();
+   activateNavItems();
 });
 
 

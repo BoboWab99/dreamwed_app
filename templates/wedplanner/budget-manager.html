@@ -117,16 +117,16 @@
 {% include 'include/header.html' %}
 {% include 'include/tools-nav.html' %}
 
-<section class="my-4">
+<section>
    <div class="container grid-200-auto">
-      <div class="side-nav">
-         <a class="pointer" onclick="getAllbudgetItems()">All</a><br>
+      <div class="side-nav py-4 pe-2">
+         <a class="pointer nav-item nav-item-active" onclick="getAllbudgetItems()">All expenses</a>
          {% for category in expense_categories %}
-         <a class="pointer" data-exp-category-id="{{ category.id }}" onclick="getExpensesInCategory(this.getAttribute('data-exp-category-id'))">{{ category.name }}</a><br>
+         <a class="pointer nav-item" data-exp-category-id="{{ category.id }}" onclick="getExpensesInCategory(this.getAttribute('data-exp-category-id'))">{{ category.name }}</a>
          {% endfor %}
       </div>
 
-      <div class="main-content">
+      <div class="main-content py-4">
          <ul class="list-group list-group-flush">
             <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-light">
                <div>
@@ -149,7 +149,8 @@
                <div id="money-spent"></div>
             </li>
             <li class="list-group-item py-3 text-center">
-               <a href="{% url 'user-profile' %}" class="btn btn-secondary">Detailed Budget Info</a>
+               Visit your profile page for detailed budget summary
+               <a href="{% url 'user-profile' %}" class="btn btn-secondary btn-sm">Go to Profile</a>
             </li>
          </ul>
          

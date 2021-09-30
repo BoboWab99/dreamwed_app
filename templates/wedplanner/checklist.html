@@ -77,15 +77,15 @@
 {% include 'include/header.html' %}
 {% include 'include/tools-nav.html' %}
 
-<section class="my-4">
+<section>
    <div class="container grid-200-auto">
-      <div class="side-nav">
-         <a class="pointer" onclick="getAllTasks()">All Tasks</a><br>
-         <a class="pointer" onclick="getTasksInProgress()">In progress</a><br>
-         <a class="pointer" onclick="getCompletedTasks()">Completed</a>
+      <div class="side-nav py-4 pe-2">
+         <a class="pointer nav-item nav-item-active" onclick="getAllTasks()">All Tasks</a>
+         <a class="pointer nav-item" onclick="getTasksInProgress()">In progress</a>
+         <a class="pointer nav-item" onclick="getCompletedTasks()">Completed</a>
       </div>
 
-      <div class="main-content">
+      <div class="main-content py-4">
          <div class="d-flex justify-content-between align-items-end">
             <div>
                <span>FILTER BY:</span><br>

@@ -58,14 +58,9 @@ async function bookmarkVendor(vendorId) {
       await response.json()
       .then(msg => {
          console.log(msg);
+         renderAllOrBookmarked();
          showNotification(msg);
       });
-
-      if (typeof getAllVendors === 'function') {
-         getAllVendors();
-      } else {
-         getSavedVendors();
-      }
    }
    url = `${LOCALHOST}/vendors/${vendorId}/bookmark`;
    fetchRequest(handleResponse, url, 'GET');
@@ -78,16 +73,22 @@ async function removeBookmark(vendorId) {
       await response.json()
       .then(msg => {
          console.log(msg);
+         renderAllOrBookmarked();
          showNotification(msg);
       });
-      if (typeof getAllVendors === 'function') {
-         getAllVendors();
-      } else {
-         getSavedVendors();
-      }
    }
    url = `${LOCALHOST}/vendors/${vendorId}/remove-bookmark`;
    fetchRequest(handleResponse, url, 'DELETE');
+}
+
+
+// show all or bookmarked vendors
+function renderAllOrBookmarked() {
+   if (typeof getAllVendors === 'function') {
+      getAllVendors();
+   } else {
+      getSavedVendors();
+   }
 }
 
 

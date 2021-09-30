@@ -161,3 +161,17 @@ function showNotification(message) {
    }
    document.getElementById('notification').innerHTML = output;
 }
+
+
+// Event Listener to activate sidebar nav
+function activateNavItems() {
+   document.querySelectorAll('.nav-item').forEach((navItem) => {
+      navItem.addEventListener('click', function () {
+         if (activeNavItem == this) return;
+
+         activeNavItem.classList.remove('nav-item-active');
+         this.classList.add('nav-item-active');
+         activeNavItem = this;
+      });
+   });
+}
