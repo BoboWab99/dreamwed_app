@@ -10,13 +10,12 @@ from django.views.generic import CreateView
 from django.http import JsonResponse
 from django.db.models import Avg, Sum
 from django.views.decorators.http import require_http_methods
-from django.db import connection
 from django.db.models import F
 
 from main.decorators import wedding_planner_required, unauthenticated_user
 from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm, BudgetItemUpdateForm, UpdateGuestForm, WeddingBudgetForm
 from dreamwed.models import User, Vendor, WeddingPlanner ,VendorCategory, Review, Guest, Todo, BudgetItem, Bookmark, ExpenseCategory, VendorImageUpload
-from main.settings import MSG_TAGS
+from .helper import *
 
 
 def get_verified_vendors():
@@ -98,18 +97,12 @@ def bookmarks(request):
 
 def bookmark_vendor(request, vendor_id):
    if not request.user.is_authenticated:
-      msg = {
-         'tag': MSG_TAGS['error'],
-         'content': 'Login required!',
-      }
+      msg = error_message('Login required!')
       return JsonResponse(msg, status=200)
 
    new_bookmark = Bookmark(wedplanner_id=request.user.id, vendor_id=vendor_id)
    new_bookmark.save()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'New bookmark added!',
-   }
+   msg = success_message('New bookmark added!')
    return JsonResponse(msg, status=200)
 
 
@@ -118,10 +111,7 @@ def bookmark_vendor(request, vendor_id):
 def delete_bookmarked_vendor(request, vendor_id):
    bookmark = Bookmark.objects.get(wedplanner_id=request.user.id, vendor_id=vendor_id)
    bookmark.delete()
-   msg = {
-      'tag': MSG_TAGS['warning'],
-      'content': 'Bookmark deleted!',
-   }
+   msg = warning_message('Bookmark deleted!')
    return JsonResponse(msg, status=200)
 
 
@@ -202,10 +192,7 @@ def add_guest(request):
       note=guest_note,
       )
    new_guest.save()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'New guest added!',
-   }
+   msg = success_message('New guest added!')
    return JsonResponse(msg, status=200)
 
 
@@ -236,10 +223,7 @@ def update_guest(request, guest_id):
 def delete_guest(request, guest_id):
    guest_to_delete = Guest.objects.get(id=guest_id)
    guest_to_delete.delete()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'Guest deleted!',
-   }
+   msg = warning_message('Guest deleted!')
    return JsonResponse(msg, status=200)
 
 
@@ -283,10 +267,7 @@ def create_task(request):
    form = TodoForm(task, wedding_date=request.user.weddingplanner.wedding_date)
 
    if not form.is_valid():
-      msg = {
-         'tag': MSG_TAGS['error'],
-         'content': form.errors.as_text(),
-      }
+      msg = error_message(form.errors.as_text())
       return JsonResponse(msg, status=200)
 
    task_content = form.cleaned_data['content']
@@ -299,10 +280,7 @@ def create_task(request):
       due_date=task_due_date, 
       )
    new_task.save()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'New task added successfully!',
-   }
+   msg = success_message('New task added successfully!')
    return JsonResponse(msg, status=200)
    
 
@@ -311,10 +289,7 @@ def create_task(request):
 def delete_task(request, task_id):
    task_to_delete = Todo.objects.get(id=task_id)
    task_to_delete.delete()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'Task deleted!',
-   }
+   msg = warning_message('Task deleted!')
    return JsonResponse(msg, status=200)
 
 
@@ -326,10 +301,7 @@ def update_task(request, task_id):
    form = TodoForm(task, wedding_date=request.user.weddingplanner.wedding_date)
 
    if not form.is_valid():
-      msg = {
-         'tag': MSG_TAGS['error'],
-         'content': form.errors.as_text(),
-      }
+      msg = error_message(form.errors.as_text())
       return JsonResponse(msg, status=200)
 
    task_to_update = Todo.objects.get(id=task_id, wedplanner_id=request.user.id)
@@ -337,10 +309,7 @@ def update_task(request, task_id):
    task_to_update.category = form.cleaned_data['category']
    task_to_update.due_date = form.cleaned_data['due_date']
    task_to_update.save()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'Task updated successfully!',
-   }
+   msg = success_message('Task updated successfully!')
    return JsonResponse(msg, status=200)
 
 
@@ -375,10 +344,7 @@ def set_wedding_budget(request):
    wedplanner.save()
    response = {
       'budget': form.cleaned_data['wedding_budget'],
-      'msg': {
-         'tag': MSG_TAGS['success'],
-         'content': 'Wedding budget updated!',
-      }
+      'msg': success_message('Wedding budget updated!')
    }
    return JsonResponse(response, status=200)
 
@@ -421,10 +387,7 @@ def create_budget_item(request):
    form = BudgetItemForm(budget_item_data)
 
    if not form.is_valid():
-      msg = {
-         'tag': MSG_TAGS['error'],
-         'content': form.errors.as_text(),
-      }
+      msg = error_message(form.errors.as_text())
       return JsonResponse(msg, status=200)
 
    budget_item_content = form.cleaned_data['description']
@@ -438,10 +401,7 @@ def create_budget_item(request):
       cost=budget_item_cost,
       )
    new_budget_item.save()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'Budget item updated successfully!',
-   }
+   msg = success_message('Budget item updated successfully!')
    return JsonResponse(msg, status=200)
 
 
@@ -453,10 +413,7 @@ def update_budget_item(request, budget_item_id):
    form = BudgetItemUpdateForm(budget_item_data)
 
    if not form.is_valid():
-      msg = {
-         'tag': MSG_TAGS['warning'],
-         'content': form.errors.as_text(),
-      }
+      msg = error_message(form.errors.as_text())
       return JsonResponse(msg, status=200)
 
    description = form.cleaned_data['description']
@@ -464,10 +421,7 @@ def update_budget_item(request, budget_item_id):
    cost = form.cleaned_data['cost']
    paid = form.cleaned_data['paid']
    if paid > cost:
-      msg = {
-         'tag': MSG_TAGS['warning'],
-         'content': 'Update failed! Paid amount can\'t be greater than the service/product cost!',
-      }
+      msg = info_message('Update failed! Paid amount can\'t be greater than the service/product cost!')
       return JsonResponse(msg, status=200)
 
    wedding_budget = WeddingPlanner.objects.get(user=request.user).wedding_budget
@@ -475,10 +429,7 @@ def update_budget_item(request, budget_item_id):
 
    total_cost += cost
    if total_cost > wedding_budget:
-      msg = {
-         'tag': MSG_TAGS['warning'],
-         'content': 'Update failed! You are going over budget!',
-      }
+      msg = warning_message('Update failed! You are going over budget!')
       return JsonResponse(msg, status=200)
 
    budget_item_to_update = BudgetItem.objects.get(id=budget_item_id, wedplanner_id=request.user.id)
@@ -487,10 +438,7 @@ def update_budget_item(request, budget_item_id):
    budget_item_to_update.cost = cost
    budget_item_to_update.paid = paid
    budget_item_to_update.save()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'Budget item updated successfully!',
-   }
+   msg = success_message('Budget item updated successfully!')
    return JsonResponse(msg, status=200)
 
 
@@ -499,10 +447,7 @@ def update_budget_item(request, budget_item_id):
 def delete_budget_item(request, budget_item_id):
    budget_item_to_delete = BudgetItem.objects.get(id=budget_item_id)
    budget_item_to_delete.delete()
-   msg = {
-      'tag': MSG_TAGS['success'],
-      'content': 'Task deleted successfully!',
-   }
+   msg = warning_message('Task deleted!')
    return JsonResponse(msg, status=200)
 
 
