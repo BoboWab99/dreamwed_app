@@ -1,7 +1,7 @@
 import json
-import datetime as DT
 
 from django.contrib.auth.decorators import login_required
+from django.db.models.aggregates import Count
 from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.db.models import Avg, Sum
 from django.views.decorators.http import require_http_methods
 from django.db import connection
+from django.db.models import F
 
 from main.decorators import wedding_planner_required, unauthenticated_user
 from dreamwed.forms import WeddingPlannerRegForm, TodoForm, GuestForm, BudgetItemForm, WeddingPlannerProfileUpdateForm, ReviewForm, BudgetItemUpdateForm, UpdateGuestForm, WeddingBudgetForm
@@ -18,34 +19,10 @@ from dreamwed.models import User, Vendor, WeddingPlanner ,VendorCategory, Review
 from main.settings import MSG_TAGS
 
 
-def dictfetchall(cursor):
-   "Return all rows from a cursor as a dict: Django Docs"
-   columns = [col[0] for col in cursor.description]
-   return [
-      dict(zip(columns, row))
-      for row in cursor.fetchall()
-   ]
-
-def execute_raw_fetch(raw_query):
-   result = [] 
-   with connection.cursor() as cursor:
-      cursor.execute(raw_query)
-      result = dictfetchall(cursor)
-   return result
-
-
-def verified_vendors():
-   ''' Verified vendors have at least 3 business pictures '''
-   enough_pics = 3
-   verified_vendors_ids = []
-   all_vendors_ids = Vendor.objects.values_list('user_id')
-
-   for vendor_id in all_vendors_ids:
-      this_vendor_pics = VendorImageUpload.objects.filter(vendor_id=vendor_id).count()
-      if (this_vendor_pics >= enough_pics):
-         verified_vendors_ids.append(vendor_id[0])
-
-   return tuple(verified_vendors_ids)
+def get_verified_vendors():
+   ''' Returns IDs of vendors with 3 or more business pictures '''
+   verified = VendorImageUpload.objects.all().values('vendor_id').annotate(img_count=Count('vendor')).filter(img_count__gte=3).order_by('-img_count')
+   return tuple([x['vendor_id'] for x in verified])
 
 
 #  VENDORS 
@@ -61,34 +38,23 @@ def vendors(request):
       }
       return render(request, 'wedplanner/vendors.html', context)
 
-   verified = f'''
-   SELECT
-      dreamwed_user.profile,
-      dreamwed_vendor.user_id AS vendor_id,
-      dreamwed_vendor.business_name,
-      dreamwed_vendor.location,
-      dreamwed_vendor.city
-   FROM dreamwed_vendor
-   INNER JOIN dreamwed_user
-      ON dreamwed_vendor.user_id = dreamwed_user.id
-      AND dreamwed_vendor.user_id IN {verified_vendors()} '''
+   verified_vendors = Vendor.objects.filter(user_id__in=get_verified_vendors()).values('business_name', 'location', 'city').annotate(profile=F('user__profile'), vendor_id=F('user__id'))
+   verified_vendors = list(verified_vendors)
 
-   verified_vendors_data = execute_raw_fetch(verified)
-
-   for verified_vendor in verified_vendors_data:
-      vendor_id  = verified_vendor['vendor_id']
+   for vendor in verified_vendors:
+      vendor_id  = vendor['vendor_id']
       num_reviews = Review.objects.filter(vendor_id=vendor_id).count()
       avrg_rating = Review.objects.filter(vendor_id=vendor_id).aggregate(Avg('stars'))
-      verified_vendor['num_reviews'] = num_reviews
-      verified_vendor['avrg_rating'] = avrg_rating['stars__avg']
-      verified_vendor['is_vendor_bookmarked'] = False
+      vendor['num_reviews'] = num_reviews
+      vendor['avrg_rating'] = avrg_rating['stars__avg']
+      vendor['is_vendor_bookmarked'] = False
 
       if request.user.is_authenticated:
          bookmark = Bookmark.objects.filter(wedplanner_id=request.user.id, vendor_id=vendor_id)
          if bookmark:
-            verified_vendor['is_vendor_bookmarked'] = True
+            vendor['is_vendor_bookmarked'] = True
 
-   return JsonResponse(verified_vendors_data, safe=False, status=200) 
+   return JsonResponse(verified_vendors, safe=False, status=200) 
 
 
 def vendor_details(request, vendor_id):
@@ -116,46 +82,18 @@ def bookmarks(request):
       saved_vendors = Vendor.objects.filter(user_id__in=bookmarks)
       return render(request, 'wedplanner/bookmarks.html', {'vendors': saved_vendors})
 
-   verified = f'''
-   SELECT
-      dreamwed_user.profile,
-      dreamwed_vendor.user_id AS vendor_id,
-      dreamwed_vendor.business_name,
-      dreamwed_vendor.location,
-      dreamwed_vendor.city
-   FROM dreamwed_vendor
-   INNER JOIN dreamwed_user
-      ON dreamwed_vendor.user_id = dreamwed_user.id
-      AND dreamwed_vendor.user_id IN {verified_vendors()} '''
+   bookmarked_vendors = Bookmark.objects.filter(wedplanner_id=request.user.id).values('vendor_id').annotate(profile=F('vendor__user__profile'), business_name=F('vendor__business_name'), location=F('vendor__location'), city=F('vendor__city'))
+   bookmarked_vendors = list(bookmarked_vendors)
 
-   bookmarked = f'''
-   SELECT 
-      dreamwed_bookmark.wedplanner_id  AS bookmark_wedplaner_id, 
-      dreamwed_bookmark.vendor_id AS bookmark_vendor_id 
-   FROM dreamwed_bookmark
-   WHERE dreamwed_bookmark.wedplanner_id = {request.user.id} '''
-
-   raw_query = f''' SELECT * 
-   FROM ({verified}) AS verified
-   INNER JOIN ({bookmarked}) AS bookmarked
-   ON verified.vendor_id = bookmarked.bookmark_vendor_id '''
-
-   data = execute_raw_fetch(raw_query)
-
-   for verified_vendor in data:
-      vendor_id  = verified_vendor['vendor_id']
+   for vendor in bookmarked_vendors:
+      vendor_id  = vendor['vendor_id']
       num_reviews = Review.objects.filter(vendor_id=vendor_id).count()
       avrg_rating = Review.objects.filter(vendor_id=vendor_id).aggregate(Avg('stars'))
-      verified_vendor['num_reviews'] = num_reviews
-      verified_vendor['avrg_rating'] = avrg_rating['stars__avg']
-      verified_vendor['is_vendor_bookmarked'] = False
+      vendor['num_reviews'] = num_reviews
+      vendor['avrg_rating'] = avrg_rating['stars__avg']
+      vendor['is_vendor_bookmarked'] = True
 
-      if request.user.is_authenticated:
-         bookmark = Bookmark.objects.filter(wedplanner_id=request.user.id, vendor_id=vendor_id)
-         if bookmark:
-            verified_vendor['is_vendor_bookmarked'] = True
-
-   return JsonResponse(data, safe=False, status=200)
+   return JsonResponse(bookmarked_vendors, safe=False, status=200)
 
 
 def bookmark_vendor(request, vendor_id):
@@ -311,21 +249,8 @@ def delete_guest(request, guest_id):
 @wedding_planner_required
 def check_list(request):
    if(request.headers.get('X-Requested-With') == 'XMLHttpRequest'):
-      raw_query = f''' 
-      SELECT 
-         dreamwed_todo.id AS todo_id,
-         dreamwed_todo.content,
-         dreamwed_todo.due_date,
-         dreamwed_todo.completed,
-         dreamwed_vendorCategory.id AS vendor_category_id,
-         dreamwed_vendorCategory.name AS vendor_category_name
-      FROM dreamwed_todo
-      INNER JOIN dreamwed_vendorCategory 
-         ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
-      WHERE dreamwed_todo.wedplanner_id = {request.user.id} '''
-
-      response = execute_raw_fetch(raw_query)
-      return JsonResponse(response, safe=False, status=200)
+      all_todos = Todo.objects.filter(wedplanner_id=request.user.id).values('content', 'due_date', 'completed').annotate(todo_id=F('id'), vendor_category_id=F('category__id'), vendor_category_name=F('category__name'))
+      return JsonResponse(list(all_todos), safe=False, status=200)
 
    form = TodoForm(wedding_date=request.user.weddingplanner.wedding_date)
    all_todos = Todo.objects.filter(wedplanner_id=request.user.id)
@@ -339,43 +264,15 @@ def check_list(request):
 @login_required
 @wedding_planner_required
 def tasks_in_progress(request):
-   raw_query = f''' 
-   SELECT 
-      dreamwed_todo.id AS todo_id,
-      dreamwed_todo.content,
-      dreamwed_todo.due_date,
-      dreamwed_todo.completed,
-      dreamwed_vendorCategory.id AS vendor_category_id,
-      dreamwed_vendorCategory.name AS vendor_category_name
-   FROM dreamwed_todo
-   INNER JOIN dreamwed_vendorCategory 
-      ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
-   WHERE dreamwed_todo.wedplanner_id = {request.user.id} 
-      AND dreamwed_todo.completed = False '''
-
-   response = execute_raw_fetch(raw_query)
-   return JsonResponse(response, safe=False, status=200)
+   all_todos = Todo.objects.filter(wedplanner_id=request.user.id, completed = False).values('content', 'due_date', 'completed').annotate(todo_id=F('id'), vendor_category_id=F('category__id'), vendor_category_name=F('category__name'))
+   return JsonResponse(list(all_todos), safe=False, status=200)
 
 
 @login_required
 @wedding_planner_required
 def tasks_completed(request):
-   raw_query = f''' 
-   SELECT 
-      dreamwed_todo.id AS todo_id,
-      dreamwed_todo.content,
-      dreamwed_todo.due_date,
-      dreamwed_todo.completed,
-      dreamwed_vendorCategory.id AS vendor_category_id,
-      dreamwed_vendorCategory.name AS vendor_category_name
-   FROM dreamwed_todo
-   INNER JOIN dreamwed_vendorCategory 
-      ON dreamwed_todo.category_id = dreamwed_vendorCategory.id
-   WHERE dreamwed_todo.wedplanner_id = {request.user.id} 
-      AND dreamwed_todo.completed = True '''
-
-   response = execute_raw_fetch(raw_query)
-   return JsonResponse(response, safe=False, status=200)
+   all_todos = Todo.objects.filter(wedplanner_id=request.user.id, completed = True).values('content', 'due_date', 'completed').annotate(todo_id=F('id'), vendor_category_id=F('category__id'), vendor_category_name=F('category__name'))
+   return JsonResponse(list(all_todos), safe=False, status=200)
 
 
 @login_required
@@ -412,7 +309,7 @@ def create_task(request):
 @login_required
 @wedding_planner_required
 def delete_task(request, task_id):
-   task_to_delete = Todo.objects.get(wedplanner_id=request.user.id, id=task_id)
+   task_to_delete = Todo.objects.get(id=task_id)
    task_to_delete.delete()
    msg = {
       'tag': MSG_TAGS['success'],
@@ -573,10 +470,8 @@ def update_budget_item(request, budget_item_id):
       }
       return JsonResponse(msg, status=200)
 
-   wedding_budget = WeddingPlanner.objects.filter(user=request.user).values_list('wedding_budget')[0][0]
-   total_cost = BudgetItem.objects.filter(
-      wedplanner_id=request.user.id
-      ).aggregate(total_cost=Sum('cost'))['total_cost']
+   wedding_budget = WeddingPlanner.objects.get(user=request.user).wedding_budget
+   total_cost = BudgetItem.objects.filter(wedplanner_id=request.user.id).aggregate(total_cost=Sum('cost'))['total_cost']
 
    total_cost += cost
    if total_cost > wedding_budget:
@@ -602,7 +497,7 @@ def update_budget_item(request, budget_item_id):
 @login_required
 @wedding_planner_required
 def delete_budget_item(request, budget_item_id):
-   budget_item_to_delete = BudgetItem.objects.get(id=budget_item_id, wedplanner_id=request.user.id)
+   budget_item_to_delete = BudgetItem.objects.get(id=budget_item_id)
    budget_item_to_delete.delete()
    msg = {
       'tag': MSG_TAGS['success'],
@@ -643,16 +538,13 @@ def budget_items_share(request):
 @login_required
 @wedding_planner_required
 def my_balance(request):
-   wedding_budget = WeddingPlanner.objects.filter(user=request.user).values_list('wedding_budget')[0][0]
-   total_paid = BudgetItem.objects.filter(
-      wedplanner_id=request.user.id
-      ).aggregate(total_paid=Sum('paid'))['total_paid']
-
-   data = {
+   wedding_budget = WeddingPlanner.objects.get(user=request.user).wedding_budget
+   total_paid = BudgetItem.objects.filter(wedplanner_id=request.user.id).aggregate(total_paid=Sum('paid'))['total_paid']
+   balance_data = {
       'wedding_budget': wedding_budget,
       'total_paid': total_paid,
    }
-   return JsonResponse(data, safe=False, status=200)
+   return JsonResponse(balance_data, safe=False, status=200)
 
 
 #  RATE VENDOR

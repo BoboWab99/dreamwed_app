@@ -87,6 +87,7 @@ def update_user_account_info(request):
       return redirect(request.META.get('HTTP_REFERER'))
 
    form.save()
+   messages.success(request, 'User account info updated!')
    return redirect('user-profile')
 
 
