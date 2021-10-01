@@ -708,3 +708,11 @@ def delete_review(request, review_id):
    review_to_delete.delete()
    messages.success(request, 'Task successfully deleted!')
    return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+@wedding_planner_required
+def my_wedding_team(request):
+   bookmarks = Bookmark.objects.filter(wedplanner_id=request.user.id)
+   bookmarked_vendors = [bookmark.vendor for bookmark in bookmarks]
+   return render(request, 'wedplanner/wedding-team.html', {'bookmarks': bookmarked_vendors})

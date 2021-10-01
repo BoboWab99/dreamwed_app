@@ -54,7 +54,9 @@ urlpatterns += [
    path('U/wedplanner-profile-update/', wedplanner.update_wedplanner_profile, name='wedplanner-profile-update'),   
    path('U/rate-vendor/<int:vendor_id>/', wedplanner.save_review, name='rate-vendor'),   
    path('U/edit-vendor-review/<int:review_id>/', wedplanner.update_review, name='edit-vendor-review'),   
-   path('U/delete-vendor-review/<int:review_id>/', wedplanner.delete_review, name='delete-vendor-review'),   
+   path('U/delete-vendor-review/<int:review_id>/', wedplanner.delete_review, name='delete-vendor-review'),
+
+   path('U/my-wedding-team/', wedplanner.my_wedding_team, name='my-wedding-team'),   
 ]
 
 

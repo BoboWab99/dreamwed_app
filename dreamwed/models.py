@@ -21,6 +21,7 @@ class User(AbstractUser):
    """Model representing a general system user"""
    is_vendor = models.BooleanField(default=False)
    is_wedding_planner = models.BooleanField(default=False)
+   phone_number = PhoneNumberField(blank=True, null=True, unique=True)
    profile = models.ImageField(default='default.jpg', upload_to='profile_pics')
 
    class Meta:
@@ -213,3 +214,14 @@ class Review(models.Model):
 
    def __str__(self):
       return f'{self.wedplanner} to {self.vendor}: {self.comment}'
+
+
+class Message(models.Model):
+   """ Model representing a message from one DreamWed user to another """
+   sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender')
+   receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receiver')
+   title = models.CharField(max_length=500)
+   message = models.TextField(max_length=5000)
+   
+   def __str__(self):
+      return self.message

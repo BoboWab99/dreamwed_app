@@ -135,6 +135,10 @@ input:disabled {display: none;}
 #dropdownProfile::after {
    display: none; 
 }
+
+.dropdown-toggle.dropdown-no-arrow::after {
+   display: none; 
+}
 .dropdown-item-no-hover:hover {
    background: initial;
    color: initial;
